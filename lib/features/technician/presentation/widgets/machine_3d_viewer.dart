@@ -275,27 +275,32 @@ class _Machine3DViewerState extends State<Machine3DViewer>
     final machine =
         _mockData.machines.firstWhere((m) => m.id == widget.machineId);
     final String imagePath = _getMachineImagePath(machine.type);
-    // Prefer a 3D model asset named after the machine id (assets/models/<machineId>.glb).
+    // Prefer a 3D model asset named after the machine id (assets/models/<machineId>.glb or .gltf).
     // If present, show a ModelViewer for true 3D rotation; otherwise fall back to the SVG image.
-    final Future<bool> _hasModel = rootBundle
+    final Future<String?> _hasModel = rootBundle
         .load('assets/models/${machine.id}.glb')
-        .then((_) => true)
-        .catchError((_) => false);
+        .then((_) => 'assets/models/${machine.id}.glb')
+        .catchError((_) => rootBundle
+            .load('assets/models/${machine.id}.gltf')
+            .then((_) => 'assets/models/${machine.id}.gltf')
+            .catchError((_) => null));
 
-    return FutureBuilder<bool>(
+    return FutureBuilder<String?>(
       future: _hasModel,
       builder: (context, snapshot) {
-        final hasModel = snapshot.data == true;
+        final modelPath = snapshot.data;
 
-        if (hasModel) {
+        if (modelPath != null) {
           final modelWidget = SizedBox(
             width: 320,
             height: 320,
             child: ModelViewer(
-              src: 'assets/models/${machine.id}.glb',
-              autoRotate: true,
+              src: modelPath,
+              autoRotate: false,
               cameraControls: true,
               alt: machine.name,
+              loading: Loading.eager,
+              disableZoom: false,
             ),
           );
           return Stack(

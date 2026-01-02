@@ -70,10 +70,12 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
 
 flutter_launcher_icons:
-  image_path: "assets/icons/app_logo.png"
-  ios: true
   android: true
-  web: true
+  ios: true
+  image_path: "assets/icons/app_logo.png"
+  web:
+    generate: true
+    image_path: "assets/icons/app_logo.png"
 
 flutter:
   uses-material-design: true
@@ -81,6 +83,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/models/
     - assets/models/
   
   # fonts:
