@@ -64,7 +64,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Welcome back, ${currentUser?.fullName?.split(' ').first ?? 'Admin'}',
+                    'Welcome back, ${currentUser!.fullName.split(' ').first}',
                     style: AppTextStyles.h3.copyWith(color: AppColors.white),
                   ),
                   const SizedBox(height: 8),

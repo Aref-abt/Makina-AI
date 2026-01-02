@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../shared/data/models/models.dart';
-import '../../../../shared/data/services/mock_data_service.dart';
+import '../../../../shared/providers/user_provider.dart';
 
 class UserManagementScreen extends ConsumerWidget {
   const UserManagementScreen({super.key});
@@ -11,7 +11,7 @@ class UserManagementScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final users = MockDataService().users;
+    final users = ref.watch(usersProvider);
 
     return Scaffold(
       backgroundColor:

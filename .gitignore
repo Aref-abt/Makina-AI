@@ -46,3 +46,5 @@ app.*.map.json
 
 # Leaked Google API key — consider rotating/revoking this key
 AIzaSyBOreisoB4EHZc2Z9HWsiYYCNC_SE1asY8
+# Firebase configuration file
+firebase_options.dart

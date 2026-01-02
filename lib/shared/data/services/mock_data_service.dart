@@ -9,7 +9,7 @@ class MockDataService {
   final Random _random = Random();
 
   // Mock Users
-  final List<UserModel> users = [
+  List<UserModel> users = [
     UserModel(
       id: 'user_001',
       fullName: 'Admin User',
@@ -643,6 +643,9 @@ class MockDataService {
 
   // Initialize mock data
   void initialize() {
-    initializeTickets();
+    // Only initialize if not already done
+    if (users.length <= 5) {
+      initializeTickets();
+    }
   }
 }

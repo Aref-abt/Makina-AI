@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../shared/data/models/models.dart';
 import '../../../../shared/data/services/mock_data_service.dart';
-import '../../../../shared/data/services/firestore_service.dart';
+import '../../../../shared/providers/user_provider.dart';
 
 class AddUserScreen extends ConsumerStatefulWidget {
   final String? userId;
@@ -260,6 +260,10 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
 
         // Use mock data service for prototype
         MockDataService().createOrUpdateUser(user);
+
+        // Trigger provider refresh to update users list in management screen
+        ref.read(usersProvider.notifier).state =
+            List.from(MockDataService().users);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
