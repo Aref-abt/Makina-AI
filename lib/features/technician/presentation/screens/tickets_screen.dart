@@ -10,7 +10,8 @@ import '../widgets/ticket_kanban_column.dart';
 
 enum TicketViewMode { board, list }
 
-final ticketViewModeProvider = StateProvider<TicketViewMode>((ref) => TicketViewMode.board);
+final ticketViewModeProvider =
+    StateProvider<TicketViewMode>((ref) => TicketViewMode.board);
 final ticketsProvider = StateProvider<List<TicketModel>>((ref) {
   return MockDataService().tickets;
 });
@@ -42,7 +43,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor:
+          isDark ? AppColors.darkBackground : AppColors.lightBackground,
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,13 +62,15 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => context.go('/technician/tickets/create'),
+          ),
           // View toggle
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkSurface
-                  : AppColors.lightGrey,
+              color: isDark ? AppColors.darkSurface : AppColors.lightGrey,
               borderRadius: BorderRadius.circular(AppDimensions.radiusM),
             ),
             child: Row(
@@ -94,7 +98,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
             onPressed: () {
               // Refresh tickets
               MockDataService().initialize();
-              ref.read(ticketsProvider.notifier).state = MockDataService().tickets;
+              ref.read(ticketsProvider.notifier).state =
+                  MockDataService().tickets;
             },
           ),
         ],
@@ -103,7 +108,7 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
         children: [
           // Stats bar
           _buildStatsBar(activeTickets, isDark),
-          
+
           // Main content
           Expanded(
             child: viewMode == TicketViewMode.board
@@ -138,7 +143,9 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
           icon,
           size: 20,
           color: isSelected
-              ? (isDark ? AppColors.primaryLightGreen : AppColors.primaryDarkGreen)
+              ? (isDark
+                  ? AppColors.primaryLightGreen
+                  : AppColors.primaryDarkGreen)
               : (isDark ? AppColors.darkTextSecondary : AppColors.grey),
         ),
       ),
@@ -146,10 +153,16 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
   }
 
   Widget _buildStatsBar(List<TicketModel> tickets, bool isDark) {
-    final todoCount = tickets.where((t) => t.status == TicketStatus.toDo).length;
-    final inProgressCount = tickets.where((t) => t.status == TicketStatus.inProgress).length;
-    final doneCount = tickets.where((t) => t.status == TicketStatus.done).length;
-    final criticalCount = tickets.where((t) => t.severity == SeverityLevel.high && t.status != TicketStatus.done).length;
+    final todoCount =
+        tickets.where((t) => t.status == TicketStatus.toDo).length;
+    final inProgressCount =
+        tickets.where((t) => t.status == TicketStatus.inProgress).length;
+    final doneCount =
+        tickets.where((t) => t.status == TicketStatus.done).length;
+    final criticalCount = tickets
+        .where((t) =>
+            t.severity == SeverityLevel.high && t.status != TicketStatus.done)
+        .length;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -162,18 +175,22 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
           children: [
             _buildStatChip('To Do', todoCount, AppColors.statusToDo, isDark),
             const SizedBox(width: 12),
-            _buildStatChip('In Progress', inProgressCount, AppColors.statusInProgress, isDark),
+            _buildStatChip('In Progress', inProgressCount,
+                AppColors.statusInProgress, isDark),
             const SizedBox(width: 12),
             _buildStatChip('Done', doneCount, AppColors.statusDone, isDark),
             const SizedBox(width: 12),
-            _buildStatChip('Critical', criticalCount, AppColors.critical, isDark, isCritical: true),
+            _buildStatChip(
+                'Critical', criticalCount, AppColors.critical, isDark,
+                isCritical: true),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatChip(String label, int count, Color color, bool isDark, {bool isCritical = false}) {
+  Widget _buildStatChip(String label, int count, Color color, bool isDark,
+      {bool isCritical = false}) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.paddingM,
@@ -215,10 +232,14 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
     );
   }
 
-  Widget _buildBoardView(List<TicketModel> tickets, bool isDark, bool isTablet) {
-    final todoTickets = tickets.where((t) => t.status == TicketStatus.toDo).toList();
-    final inProgressTickets = tickets.where((t) => t.status == TicketStatus.inProgress).toList();
-    final doneTickets = tickets.where((t) => t.status == TicketStatus.done).toList();
+  Widget _buildBoardView(
+      List<TicketModel> tickets, bool isDark, bool isTablet) {
+    final todoTickets =
+        tickets.where((t) => t.status == TicketStatus.toDo).toList();
+    final inProgressTickets =
+        tickets.where((t) => t.status == TicketStatus.inProgress).toList();
+    final doneTickets =
+        tickets.where((t) => t.status == TicketStatus.done).toList();
 
     if (isTablet) {
       // Horizontal layout for tablets
@@ -233,7 +254,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
                 status: TicketStatus.toDo,
                 tickets: todoTickets,
                 color: AppColors.statusToDo,
-                onTicketTap: (ticket) => context.go('/technician/tickets/${ticket.id}'),
+                onTicketTap: (ticket) =>
+                    context.go('/technician/tickets/${ticket.id}'),
               ),
             ),
             const SizedBox(width: 16),
@@ -243,7 +265,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
                 status: TicketStatus.inProgress,
                 tickets: inProgressTickets,
                 color: AppColors.statusInProgress,
-                onTicketTap: (ticket) => context.go('/technician/tickets/${ticket.id}'),
+                onTicketTap: (ticket) =>
+                    context.go('/technician/tickets/${ticket.id}'),
               ),
             ),
             const SizedBox(width: 16),
@@ -253,7 +276,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
                 status: TicketStatus.done,
                 tickets: doneTickets,
                 color: AppColors.statusDone,
-                onTicketTap: (ticket) => context.go('/technician/tickets/${ticket.id}'),
+                onTicketTap: (ticket) =>
+                    context.go('/technician/tickets/${ticket.id}'),
               ),
             ),
           ],
@@ -275,7 +299,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
               status: TicketStatus.toDo,
               tickets: todoTickets,
               color: AppColors.statusToDo,
-              onTicketTap: (ticket) => context.go('/technician/tickets/${ticket.id}'),
+              onTicketTap: (ticket) =>
+                  context.go('/technician/tickets/${ticket.id}'),
             ),
           ),
           const SizedBox(width: 16),
@@ -286,7 +311,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
               status: TicketStatus.inProgress,
               tickets: inProgressTickets,
               color: AppColors.statusInProgress,
-              onTicketTap: (ticket) => context.go('/technician/tickets/${ticket.id}'),
+              onTicketTap: (ticket) =>
+                  context.go('/technician/tickets/${ticket.id}'),
             ),
           ),
           const SizedBox(width: 16),
@@ -297,7 +323,8 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
               status: TicketStatus.done,
               tickets: doneTickets,
               color: AppColors.statusDone,
-              onTicketTap: (ticket) => context.go('/technician/tickets/${ticket.id}'),
+              onTicketTap: (ticket) =>
+                  context.go('/technician/tickets/${ticket.id}'),
             ),
           ),
         ],

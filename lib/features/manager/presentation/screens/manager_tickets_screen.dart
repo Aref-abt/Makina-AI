@@ -15,14 +15,26 @@ class ManagerTicketsScreen extends ConsumerWidget {
     final tickets = MockDataService().tickets;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
-      appBar: AppBar(title: const Text('All Tickets')),
+      backgroundColor:
+          isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      appBar: AppBar(
+        title: const Text('All Tickets'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () => context.go('/manager/tickets/create'),
+          ),
+        ],
+      ),
       body: ListView.builder(
         padding: const EdgeInsets.all(AppDimensions.paddingL),
         itemCount: tickets.length,
         itemBuilder: (context, index) => Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: TicketCard(ticket: tickets[index], onTap: () => context.go('/manager/tickets/${tickets[index].id}'), isListView: true),
+          child: TicketCard(
+              ticket: tickets[index],
+              onTap: () => context.go('/manager/tickets/${tickets[index].id}'),
+              isListView: true),
         ),
       ),
     );

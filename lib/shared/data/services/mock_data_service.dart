@@ -262,7 +262,8 @@ class MockDataService {
       TicketModel(
         id: 'ticket_001',
         title: 'Critical: Spindle Motor Overheating',
-        description: 'Main spindle motor temperature exceeding safe operating limits. Abnormal vibration patterns detected.',
+        description:
+            'Main spindle motor temperature exceeding safe operating limits. Abnormal vibration patterns detected.',
         machineId: 'machine_001',
         machineName: 'CNC Machine Alpha',
         componentId: 'comp_001_1',
@@ -273,7 +274,8 @@ class MockDataService {
         assigneeName: 'Mike Chen',
         requiredSkill: ExpertiseType.mechanical,
         createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        aiInsight: 'Based on sensor data analysis, the spindle motor is showing signs of bearing wear. Temperature has increased 35% above baseline over the past 6 hours. Vibration frequency patterns match historical bearing degradation cases.',
+        aiInsight:
+            'Based on sensor data analysis, the spindle motor is showing signs of bearing wear. Temperature has increased 35% above baseline over the past 6 hours. Vibration frequency patterns match historical bearing degradation cases.',
         aiConfidence: 0.87,
         estimatedDowntimeMinutes: 180,
         estimatedCost: 2550.0,
@@ -299,7 +301,8 @@ class MockDataService {
       TicketModel(
         id: 'ticket_002',
         title: 'Warning: Hydraulic Pressure Fluctuation',
-        description: 'Hydraulic system showing irregular pressure readings. May indicate seal wear or pump issues.',
+        description:
+            'Hydraulic system showing irregular pressure readings. May indicate seal wear or pump issues.',
         machineId: 'machine_002',
         machineName: 'Industrial Press Beta',
         componentId: 'comp_002_1',
@@ -308,7 +311,8 @@ class MockDataService {
         status: TicketStatus.toDo,
         requiredSkill: ExpertiseType.mechanical,
         createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-        aiInsight: 'Pressure fluctuations of ±15% detected. This pattern typically indicates early-stage seal degradation. Recommend inspection within 48 hours.',
+        aiInsight:
+            'Pressure fluctuations of ±15% detected. This pattern typically indicates early-stage seal degradation. Recommend inspection within 48 hours.',
         aiConfidence: 0.72,
         estimatedDowntimeMinutes: 90,
         estimatedCost: 1080.0,
@@ -316,7 +320,8 @@ class MockDataService {
       TicketModel(
         id: 'ticket_003',
         title: 'Robot Arm Calibration Drift',
-        description: 'Position accuracy has degraded by 0.5mm over the past week. Requires recalibration.',
+        description:
+            'Position accuracy has degraded by 0.5mm over the past week. Requires recalibration.',
         machineId: 'machine_004',
         machineName: 'Robot Arm Delta',
         componentId: 'comp_004_1',
@@ -328,7 +333,8 @@ class MockDataService {
         requiredSkill: ExpertiseType.automation,
         createdAt: DateTime.now().subtract(const Duration(hours: 8)),
         scheduledAt: DateTime.now().add(const Duration(hours: 4)),
-        aiInsight: 'Encoder feedback shows gradual drift pattern. Similar to case #2847 from March. Likely requires encoder recalibration and servo tuning.',
+        aiInsight:
+            'Encoder feedback shows gradual drift pattern. Similar to case #2847 from March. Likely requires encoder recalibration and servo tuning.',
         aiConfidence: 0.81,
         estimatedDowntimeMinutes: 60,
         estimatedCost: 1200.0,
@@ -336,7 +342,8 @@ class MockDataService {
       TicketModel(
         id: 'ticket_004',
         title: 'Critical: Compressor High Temperature Alert',
-        description: 'Air compressor discharge temperature exceeding limits. Auto-shutdown imminent.',
+        description:
+            'Air compressor discharge temperature exceeding limits. Auto-shutdown imminent.',
         machineId: 'machine_007',
         machineName: 'Compressor Station G',
         componentId: 'comp_007_1',
@@ -345,7 +352,8 @@ class MockDataService {
         status: TicketStatus.toDo,
         requiredSkill: ExpertiseType.hvac,
         createdAt: DateTime.now().subtract(const Duration(minutes: 45)),
-        aiInsight: 'Discharge temperature at 215°F, threshold is 200°F. Oil cooler efficiency has dropped 22%. Immediate inspection required to prevent auto-shutdown.',
+        aiInsight:
+            'Discharge temperature at 215°F, threshold is 200°F. Oil cooler efficiency has dropped 22%. Immediate inspection required to prevent auto-shutdown.',
         aiConfidence: 0.94,
         estimatedDowntimeMinutes: 240,
         estimatedCost: 2080.0,
@@ -353,7 +361,8 @@ class MockDataService {
       TicketModel(
         id: 'ticket_005',
         title: 'Conveyor Belt Tension Adjustment',
-        description: 'Belt tracking slightly off-center. Minor adjustment needed during next maintenance window.',
+        description:
+            'Belt tracking slightly off-center. Minor adjustment needed during next maintenance window.',
         machineId: 'machine_003',
         machineName: 'Conveyor System C',
         severity: SeverityLevel.low,
@@ -363,7 +372,8 @@ class MockDataService {
         requiredSkill: ExpertiseType.mechanical,
         createdAt: DateTime.now().subtract(const Duration(days: 1)),
         resolvedAt: DateTime.now().subtract(const Duration(hours: 18)),
-        aiInsight: 'Belt tracking deviation of 3mm detected. Within acceptable range but recommend adjustment during scheduled maintenance.',
+        aiInsight:
+            'Belt tracking deviation of 3mm detected. Within acceptable range but recommend adjustment during scheduled maintenance.',
         aiConfidence: 0.68,
         estimatedDowntimeMinutes: 30,
         estimatedCost: 225.0,
@@ -379,13 +389,15 @@ class MockDataService {
           actionTaken: ActionTaken.adjustment,
           outcome: Outcome.resolved,
           verification: IssueVerification.issueFound,
-          notes: 'Adjusted belt tension and realigned tracking rollers. Running smoothly now.',
+          notes:
+              'Adjusted belt tension and realigned tracking rollers. Running smoothly now.',
         ),
       ),
       TicketModel(
         id: 'ticket_006',
         title: 'Packaging Machine Sensor Error',
-        description: 'Product detection sensor intermittently failing. Causing occasional packaging errors.',
+        description:
+            'Product detection sensor intermittently failing. Causing occasional packaging errors.',
         machineId: 'machine_005',
         machineName: 'Packaging Unit E',
         componentId: 'comp_005_1',
@@ -397,7 +409,8 @@ class MockDataService {
         requiredSkill: ExpertiseType.electrical,
         createdAt: DateTime.now().subtract(const Duration(hours: 3)),
         respondedAt: DateTime.now().subtract(const Duration(hours: 1)),
-        aiInsight: 'Sensor signal shows intermittent dropouts. Pattern suggests possible loose connection or contamination on sensor lens. Check wiring and clean sensor surface.',
+        aiInsight:
+            'Sensor signal shows intermittent dropouts. Pattern suggests possible loose connection or contamination on sensor lens. Check wiring and clean sensor surface.',
         aiConfidence: 0.76,
         estimatedDowntimeMinutes: 45,
         estimatedCost: 285.0,
@@ -413,9 +426,12 @@ class MockDataService {
       ticketId: ticketId,
       machineId: ticket.machineId,
       componentId: ticket.componentId ?? '',
-      whatIsHappening: 'The ${ticket.componentName ?? "component"} is showing abnormal behavior patterns. Sensor readings indicate deviation from normal operating parameters.',
-      whyItMatters: 'If left unaddressed, this could lead to component failure within 24-48 hours, causing unplanned downtime and potential damage to connected systems.',
-      potentialCause: 'Based on historical data and current sensor patterns, the most likely cause is bearing wear leading to increased friction and heat generation.',
+      whatIsHappening:
+          'The ${ticket.componentName ?? "component"} is showing abnormal behavior patterns. Sensor readings indicate deviation from normal operating parameters.',
+      whyItMatters:
+          'If left unaddressed, this could lead to component failure within 24-48 hours, causing unplanned downtime and potential damage to connected systems.',
+      potentialCause:
+          'Based on historical data and current sensor patterns, the most likely cause is bearing wear leading to increased friction and heat generation.',
       confidenceLevel: ticket.aiConfidence ?? 0.75,
       contributingSignals: [
         SensorSignal(
@@ -447,7 +463,8 @@ class MockDataService {
         'Case #2341 (Jan 2024): Similar vibration pattern resolved with bearing replacement',
         'Case #1892 (Oct 2023): Motor overheating due to blocked cooling vents',
       ],
-      uncertaintyNote: 'Could also be caused by misalignment. Verify during physical inspection.',
+      uncertaintyNote:
+          'Could also be caused by misalignment. Verify during physical inspection.',
     );
   }
 
@@ -482,11 +499,17 @@ class MockDataService {
     return DashboardKPI(
       totalMachines: machines.length,
       totalSensors: 42,
-      healthyMachines: machines.where((m) => m.healthStatus == HealthStatus.healthy).length,
-      warningMachines: machines.where((m) => m.healthStatus == HealthStatus.warning).length,
-      criticalMachines: machines.where((m) => m.healthStatus == HealthStatus.critical).length,
+      healthyMachines:
+          machines.where((m) => m.healthStatus == HealthStatus.healthy).length,
+      warningMachines:
+          machines.where((m) => m.healthStatus == HealthStatus.warning).length,
+      criticalMachines:
+          machines.where((m) => m.healthStatus == HealthStatus.critical).length,
       activeTickets: tickets.where((t) => t.status != TicketStatus.done).length,
-      criticalTickets: tickets.where((t) => t.severity == SeverityLevel.high && t.status != TicketStatus.done).length,
+      criticalTickets: tickets
+          .where((t) =>
+              t.severity == SeverityLevel.high && t.status != TicketStatus.done)
+          .length,
       totalDowntimeHours: 12.5,
       estimatedCostImpact: 8420.0,
       downtimeChangePercent: -15.3,
@@ -496,7 +519,8 @@ class MockDataService {
   }
 
   // Generate sensor history data for charts
-  List<SensorDataPoint> generateSensorHistory(String sensorType, int hoursBack) {
+  List<SensorDataPoint> generateSensorHistory(
+      String sensorType, int hoursBack) {
     final List<SensorDataPoint> data = [];
     final now = DateTime.now();
     double baseValue;
@@ -524,8 +548,8 @@ class MockDataService {
       final timestamp = now.subtract(Duration(minutes: i));
       // Add trend towards the end (showing degradation)
       final trendFactor = (hoursBack * 60 - i) / (hoursBack * 60);
-      final value = baseValue + 
-          (_random.nextDouble() - 0.5) * variance + 
+      final value = baseValue +
+          (_random.nextDouble() - 0.5) * variance +
           trendFactor * variance * 0.5;
       data.add(SensorDataPoint(timestamp: timestamp, value: value));
     }
@@ -540,10 +564,11 @@ class MockDataService {
   // Get tickets for technician
   List<TicketModel> getTicketsForTechnician(String technicianId) {
     final user = users.firstWhere((u) => u.id == technicianId);
-    return tickets.where((t) => 
-      user.assignedMachineIds.contains(t.machineId) ||
-      t.assigneeId == technicianId
-    ).toList();
+    return tickets
+        .where((t) =>
+            user.assignedMachineIds.contains(t.machineId) ||
+            t.assigneeId == technicianId)
+        .toList();
   }
 
   // Update ticket status
@@ -552,10 +577,37 @@ class MockDataService {
     if (index != -1) {
       tickets[index] = tickets[index].copyWith(
         status: newStatus,
-        respondedAt: newStatus == TicketStatus.inProgress ? DateTime.now() : null,
+        respondedAt:
+            newStatus == TicketStatus.inProgress ? DateTime.now() : null,
         resolvedAt: newStatus == TicketStatus.done ? DateTime.now() : null,
       );
     }
+  }
+
+  // Create a new ticket and add to the list
+  TicketModel createTicket({
+    required String title,
+    required String description,
+    required String machineId,
+    required String machineName,
+    SeverityLevel severity = SeverityLevel.medium,
+    ExpertiseType requiredSkill = ExpertiseType.general,
+    String? assigneeId,
+  }) {
+    final newId = 'ticket_${_random.nextInt(100000)}';
+    final ticket = TicketModel(
+      id: newId,
+      title: title,
+      description: description,
+      machineId: machineId,
+      machineName: machineName,
+      severity: severity,
+      requiredSkill: requiredSkill,
+      assigneeId: assigneeId,
+      createdAt: DateTime.now(),
+    );
+    tickets.insert(0, ticket);
+    return ticket;
   }
 
   // Assign ticket

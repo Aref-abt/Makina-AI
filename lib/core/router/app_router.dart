@@ -15,6 +15,7 @@ import '../../features/manager/presentation/screens/manager_shell.dart';
 import '../../features/manager/presentation/screens/manager_dashboard_screen.dart';
 import '../../features/manager/presentation/screens/manager_tickets_screen.dart';
 import '../../features/manager/presentation/screens/manager_ticket_detail_screen.dart';
+import '../../features/tickets/presentation/screens/create_ticket_screen.dart';
 import '../../features/manager/presentation/screens/calendar_screen.dart';
 import '../../features/manager/presentation/screens/analytics_screen.dart';
 import '../../features/manager/presentation/screens/reports_screen.dart';
@@ -26,7 +27,7 @@ import '../../features/super_admin/presentation/screens/add_user_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final currentUser = ref.watch(currentUserProvider);
-  
+
   return GoRouter(
     initialLocation: '/splash',
     debugLogDiagnostics: true,
@@ -61,7 +62,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
       ),
-      
+
       // Login Screen
       GoRoute(
         path: '/login',
@@ -76,6 +77,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: '/technician/tickets',
             builder: (context, state) => const TicketsScreen(),
             routes: [
+              GoRoute(
+                path: 'create',
+                builder: (context, state) => const CreateTicketScreen(),
+              ),
               GoRoute(
                 path: ':ticketId',
                 builder: (context, state) {
@@ -117,6 +122,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: '/manager/tickets',
             builder: (context, state) => const ManagerTicketsScreen(),
             routes: [
+              GoRoute(
+                path: 'create',
+                builder: (context, state) => const CreateTicketScreen(),
+              ),
               GoRoute(
                 path: ':ticketId',
                 builder: (context, state) {
