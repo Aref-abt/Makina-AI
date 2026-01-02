@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "30350033000",
+    "project_id": "y4s-prototype",
+    "storage_bucket": "y4s-prototype.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30350033000:android:1d37b8a04e7989739b7bdd",
+        "android_client_info": {
+          "package_name": "com.devitty.makinaai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOreisoB4EHZc2Z9HWsiYYCNC_SE1asY8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
