@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Leaked Google API key — consider rotating/revoking this key
+AIzaSyBOreisoB4EHZc2Z9HWsiYYCNC_SE1asY8
