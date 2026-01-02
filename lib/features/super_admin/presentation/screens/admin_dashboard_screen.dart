@@ -212,6 +212,7 @@ class AdminDashboardScreen extends ConsumerWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             padding: const EdgeInsets.all(10),
@@ -221,21 +222,27 @@ class AdminDashboardScreen extends ConsumerWidget {
             ),
             child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Text(
             value,
             style: AppTextStyles.h3.copyWith(
               color: isDark ? AppColors.darkText : AppColors.lightText,
+              fontSize: 20,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             title,
             style: AppTextStyles.bodySmall.copyWith(
               color: isDark
                   ? AppColors.darkTextSecondary
                   : AppColors.lightTextSecondary,
+              fontSize: 11,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
