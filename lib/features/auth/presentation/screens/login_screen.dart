@@ -5,6 +5,7 @@ import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/data/models/models.dart';
 import '../../../../shared/data/services/auth_service.dart';
+import '../../../../shared/widgets/app_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -91,30 +92,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Logo
-                    Center(
-                      child: Container(
+                    const Center(
+                      child: SizedBox(
                         width: 100,
                         height: 100,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primaryDarkGreen.withOpacity(0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'M',
-                            style: TextStyle(
-                              fontSize: 48,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.white,
-                            ),
-                          ),
+                        child: Padding(
+                          padding: EdgeInsets.all(0),
+                          child: _LoginLogoWrapper(),
                         ),
                       ),
                     ),
@@ -124,7 +108,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Text(
                       'Welcome Back',
                       style: AppTextStyles.h2.copyWith(
-                        color: isDark ? AppColors.darkText : AppColors.lightText,
+                        color:
+                            isDark ? AppColors.darkText : AppColors.lightText,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -146,7 +131,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         padding: const EdgeInsets.all(AppDimensions.paddingM),
                         decoration: BoxDecoration(
                           color: AppColors.critical.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+                          borderRadius:
+                              BorderRadius.circular(AppDimensions.radiusM),
                           border: Border.all(
                             color: AppColors.critical.withOpacity(0.3),
                           ),
@@ -296,7 +282,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         color: isDark
                             ? AppColors.darkSurface
                             : AppColors.lightGrey,
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusM),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,5 +385,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       ),
     );
+  }
+}
+
+class _LoginLogoWrapper extends StatelessWidget {
+  const _LoginLogoWrapper({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Use the asset logo when available; AppLogo falls back to 'M'
+    return const AppLogo(width: 100, height: 100, borderRadius: 25);
   }
 }
