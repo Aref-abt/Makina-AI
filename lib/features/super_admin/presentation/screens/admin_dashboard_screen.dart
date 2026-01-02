@@ -19,22 +19,15 @@ class AdminDashboardScreen extends ConsumerWidget {
     final users = mockData.users;
     final machines = mockData.machines;
     final currentUser = ref.watch(currentUserProvider);
+    final techCount = users.where((u) => u.role == UserRole.technician).length;
+    final managerCount = users.where((u) => u.role == UserRole.manager).length;
 
     return Scaffold(
       backgroundColor:
           isDark ? AppColors.darkBackground : AppColors.lightBackground,
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Admin Dashboard'),
-            Text('Welcome, ${currentUser?.fullName ?? 'Admin'}',
-                style: AppTextStyles.bodySmall.copyWith(
-                    color: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary)),
-          ],
-        ),
+        elevation: 0,
+        title: const Text('Admin Dashboard'),
         actions: [
           IconButton(
               icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
@@ -49,76 +42,90 @@ class AdminDashboardScreen extends ConsumerWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppDimensions.paddingL),
+        padding: const EdgeInsets.all(AppDimensions.paddingXL),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Stats Cards - Responsive Grid
-            if (isMobile)
-              Column(
-                children: [
-                  _buildStatCard('Total Users', '${users.length}', Icons.people,
-                      AppColors.info, isDark),
-                  const SizedBox(height: 12),
-                  _buildStatCard(
-                      'Technicians',
-                      '${users.where((u) => u.role == UserRole.technician).length}',
-                      Icons.engineering,
-                      AppColors.primaryDarkGreen,
-                      isDark),
-                  const SizedBox(height: 12),
-                  _buildStatCard(
-                      'Managers',
-                      '${users.where((u) => u.role == UserRole.manager).length}',
-                      Icons.supervisor_account,
-                      AppColors.warning,
-                      isDark),
-                  const SizedBox(height: 12),
-                  _buildStatCard(
-                      'Machines',
-                      '${machines.length}',
-                      Icons.precision_manufacturing,
-                      AppColors.critical,
-                      isDark),
+            // Welcome Header
+            Container(
+              padding: const EdgeInsets.all(AppDimensions.paddingXL),
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryDarkGreen.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
                 ],
-              )
-            else
-              Row(
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
+                  Text(
+                    'Welcome back, ${currentUser?.fullName?.split(' ').first ?? 'Admin'}',
+                    style: AppTextStyles.h3.copyWith(color: AppColors.white),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Here\'s your system overview',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.white.withOpacity(0.9),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // Stats Grid (2x2)
+            Text('System Overview', style: AppTextStyles.h5),
+            const SizedBox(height: 16),
+            Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
                       child: _buildStatCard('Total Users', '${users.length}',
-                          Icons.people, AppColors.info, isDark)),
-                  const SizedBox(width: 16),
-                  Expanded(
+                          Icons.people, AppColors.info, isDark),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
                       child: _buildStatCard(
                           'Technicians',
-                          '${users.where((u) => u.role == UserRole.technician).length}',
+                          '$techCount',
                           Icons.engineering,
                           AppColors.primaryDarkGreen,
-                          isDark)),
-                  const SizedBox(width: 16),
-                  Expanded(
-                      child: _buildStatCard(
-                          'Managers',
-                          '${users.where((u) => u.role == UserRole.manager).length}',
-                          Icons.supervisor_account,
-                          AppColors.warning,
-                          isDark)),
-                  const SizedBox(width: 16),
-                  Expanded(
+                          isDark),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard('Managers', '$managerCount',
+                          Icons.supervisor_account, AppColors.warning, isDark),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
                       child: _buildStatCard(
                           'Machines',
                           '${machines.length}',
                           Icons.precision_manufacturing,
                           AppColors.critical,
-                          isDark)),
-                ],
-              ),
-            const SizedBox(height: 24),
+                          isDark),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
 
             // Quick Actions
-            Text('Quick Actions', style: AppTextStyles.h6),
-            const SizedBox(height: 12),
+            Text('Quick Actions', style: AppTextStyles.h5),
+            const SizedBox(height: 16),
             if (isMobile)
               Column(
                 children: [
@@ -129,38 +136,55 @@ class AdminDashboardScreen extends ConsumerWidget {
                       () => context.go('/admin/users'), isDark),
                   const SizedBox(height: 12),
                   _buildActionCard(
-                      'System Settings', Icons.settings, () {}, isDark),
+                      'System Settings', Icons.settings_suggest, () {}, isDark),
                 ],
               )
             else
-              Row(
+              Column(
                 children: [
-                  Expanded(
-                      child: _buildActionCard('Add User', Icons.person_add,
-                          () => context.go('/admin/users/add'), isDark)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                      child: _buildActionCard('Manage Users', Icons.people,
-                          () => context.go('/admin/users'), isDark)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                      child: _buildActionCard(
-                          'System Settings', Icons.settings, () {}, isDark)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildActionCard('Add User', Icons.person_add,
+                            () => context.go('/admin/users/add'), isDark),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildActionCard('Manage Users', Icons.people,
+                            () => context.go('/admin/users'), isDark),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildActionCard('System Settings',
+                            Icons.settings_suggest, () {}, isDark),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
-            // Recent Users
+            // Recent Users Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Recent Users', style: AppTextStyles.h6),
-                TextButton(
-                    onPressed: () => context.go('/admin/users'),
-                    child: const Text('View All')),
+                Text('Recent Users', style: AppTextStyles.h5),
+                TextButton.icon(
+                  onPressed: () => context.go('/admin/users'),
+                  icon: const Icon(Icons.arrow_forward),
+                  label: const Text('View All'),
+                ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             ...users.take(5).map((user) => _buildUserTile(user, isDark)),
           ],
         ),
@@ -176,24 +200,43 @@ class AdminDashboardScreen extends ConsumerWidget {
         color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusL),
         border: Border.all(
-            color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+            color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+            width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8)),
-              child: Icon(icon, color: color, size: 20)),
-          const SizedBox(height: 12),
-          Text(value, style: AppTextStyles.h4),
-          Text(title,
-              style: AppTextStyles.bodySmall.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.lightTextSecondary)),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            value,
+            style: AppTextStyles.h3.copyWith(
+              color: isDark ? AppColors.darkText : AppColors.lightText,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary,
+            ),
+          ),
         ],
       ),
     );
@@ -201,47 +244,124 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   Widget _buildActionCard(
       String title, IconData icon, VoidCallback onTap, bool isDark) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-      child: Container(
-        padding: const EdgeInsets.all(AppDimensions.paddingL),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-          border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+        child: Container(
+          padding: const EdgeInsets.all(AppDimensions.paddingXL),
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusL),
+            border: Border.all(
+              color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryDarkGreen.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryDarkGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColors.primaryDarkGreen,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: isDark ? AppColors.darkText : AppColors.lightText,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
-        child: Column(children: [
-          Icon(icon, color: AppColors.primaryDarkGreen, size: 32),
-          const SizedBox(height: 8),
-          Text(title, style: AppTextStyles.labelMedium)
-        ]),
       ),
     );
   }
 
   Widget _buildUserTile(UserModel user, bool isDark) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-            backgroundColor: AppColors.primaryDarkGreen.withOpacity(0.2),
-            child: Text(user.fullName.substring(0, 1),
-                style: const TextStyle(
-                    color: AppColors.primaryDarkGreen,
-                    fontWeight: FontWeight.bold))),
-        title: Text(user.fullName),
-        subtitle: Text(user.email),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-              color: AppColors.primaryDarkGreen.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12)),
-          child: Text(user.role.displayName,
-              style: AppTextStyles.labelSmall
-                  .copyWith(color: AppColors.primaryDarkGreen)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(AppDimensions.paddingL),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+        border: Border.all(
+          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
         ),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: AppColors.primaryDarkGreen.withOpacity(0.15),
+            child: Text(
+              user.fullName.substring(0, 1).toUpperCase(),
+              style: const TextStyle(
+                color: AppColors.primaryDarkGreen,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user.fullName,
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: isDark ? AppColors.darkText : AppColors.lightText,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  user.email,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.lightTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.paddingM,
+              vertical: AppDimensions.paddingS,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.primaryDarkGreen.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+            ),
+            child: Text(
+              user.role.displayName,
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.primaryDarkGreen,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

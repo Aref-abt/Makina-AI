@@ -33,15 +33,25 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
   void initState() {
     super.initState();
     if (widget.userId != null) {
-      final user =
-          MockDataService().users.firstWhere((u) => u.id == widget.userId);
-      _nameController.text = user.fullName;
-      _employeeIdController.text = user.employeeId;
-      _emailController.text = user.email;
-      _selectedRole = user.role;
-      _selectedFloor = user.assignedFloor;
-      _selectedExpertise.addAll(user.expertise);
-      _selectedMachines.addAll(user.assignedMachineIds);
+      try {
+        final user =
+            MockDataService().users.firstWhere((u) => u.id == widget.userId);
+        _nameController.text = user.fullName;
+        _employeeIdController.text = user.employeeId;
+        _emailController.text = user.email;
+        _selectedRole = user.role;
+        _selectedFloor = user.assignedFloor;
+        _selectedExpertise.addAll(user.expertise);
+        _selectedMachines.addAll(user.assignedMachineIds);
+      } catch (e) {
+        // User not found, show error
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User not found')),
+          );
+          Navigator.of(context).pop();
+        });
+      }
     }
   }
 
@@ -248,13 +258,8 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
           assignedMachineIds: _selectedMachines.toList(),
         );
 
-        final firestoreService = ref.read(firestoreServiceProvider);
-
-        if (isEditing) {
-          await firestoreService.updateUser(user);
-        } else {
-          await firestoreService.addUser(user);
-        }
+        // Use mock data service for prototype
+        MockDataService().createOrUpdateUser(user);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -271,8 +276,9 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('Error: $e'),
-                backgroundColor: AppColors.critical),
+              content: Text('Error: $e'),
+              backgroundColor: AppColors.critical,
+            ),
           );
         }
       } finally {

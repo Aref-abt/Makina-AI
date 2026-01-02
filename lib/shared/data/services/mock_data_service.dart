@@ -610,6 +610,25 @@ class MockDataService {
     return ticket;
   }
 
+  // Update an existing user
+  void updateUser(String userId, UserModel updatedUser) {
+    final index = users.indexWhere((u) => u.id == userId);
+    if (index != -1) {
+      users[index] = updatedUser;
+    }
+  }
+
+  // Create or update user
+  UserModel createOrUpdateUser(UserModel user) {
+    final index = users.indexWhere((u) => u.id == user.id);
+    if (index != -1) {
+      users[index] = user;
+    } else {
+      users.add(user);
+    }
+    return user;
+  }
+
   // Assign ticket
   void assignTicket(String ticketId, String assigneeId) {
     final index = tickets.indexWhere((t) => t.id == ticketId);
