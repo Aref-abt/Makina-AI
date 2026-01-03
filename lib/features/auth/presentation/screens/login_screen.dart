@@ -1,10 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/data/models/models.dart';
 import '../../../../shared/data/services/auth_service.dart';
+import '../../../../shared/data/services/data_import_service.dart';
 import '../../../../shared/widgets/app_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -21,12 +24,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
+  String? _uploadedFileName;
+  bool _isImporting = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleFileUpload() async {
+    try {
+      setState(() {
+        _isImporting = true;
+        _errorMessage = null;
+      });
+
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv', 'xlsx', 'xls'],
+        allowMultiple: false,
+      );
+
+      if (result == null || result.files.isEmpty) {
+        setState(() => _isImporting = false);
+        return;
+      }
+
+      final file = File(result.files.first.path!);
+      final importService = DataImportService();
+
+      // Import the data
+      final importResult = await importService.importFromCSV(file);
+
+      setState(() {
+        _isImporting = false;
+        if (importResult.success) {
+          _uploadedFileName = result.files.first.name;
+          _errorMessage = null;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(importResult.message),
+              backgroundColor: AppColors.healthy,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        } else {
+          _errorMessage = importResult.message;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isImporting = false;
+        _errorMessage = 'Failed to import file: $e';
+      });
+    }
   }
 
   Future<void> _handleLogin() async {
@@ -228,6 +282,115 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       },
                     ),
                     const SizedBox(height: 32),
+
+                    // File upload section
+                    Container(
+                      padding: const EdgeInsets.all(AppDimensions.paddingL),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.darkSurface.withOpacity(0.5)
+                            : AppColors.lightSurface,
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusM),
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.upload_file_outlined,
+                                color: isDark
+                                    ? AppColors.primaryLightGreen
+                                    : AppColors.primaryDarkGreen,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Import Machine Data',
+                                  style: AppTextStyles.labelLarge.copyWith(
+                                    color: isDark
+                                        ? AppColors.darkText
+                                        : AppColors.lightText,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Upload CSV/Excel files with machine documentation',
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          if (_uploadedFileName != null) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.healthy.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(
+                                    AppDimensions.radiusS),
+                                border: Border.all(
+                                  color: AppColors.healthy.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle_outline,
+                                    color: AppColors.healthy,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _uploadedFileName!,
+                                      style: AppTextStyles.bodySmall.copyWith(
+                                        color: AppColors.healthy,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                          OutlinedButton.icon(
+                            onPressed: _isImporting ? null : _handleFileUpload,
+                            icon: _isImporting
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.file_upload_outlined,
+                                    size: 18),
+                            label: Text(
+                                _isImporting ? 'Importing...' : 'Choose File'),
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 40),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
 
                     // Login button
                     SizedBox(

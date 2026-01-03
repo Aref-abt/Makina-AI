@@ -1,0 +1,21 @@
+Title,Description,Machine,Component,Severity,Status,Date Created
+Spindle Motor Overheating,Main spindle temperature exceeding safe operating limits (95°C vs 65°C normal). Abnormal vibration patterns detected at 8.2 Hz.,Haas VF-2SS CNC Mill,Main Spindle Motor,High,Open,2026-01-02
+Bearing Assembly Degradation,Increased vibration and temperature in bearing assembly. Temperature at 72°C with 5.1 Hz vibration frequency.,Haas VF-2SS CNC Mill,Bearing Assembly A,Medium,In Progress,2026-01-01
+Hydraulic System Pressure Drop,Main cylinder showing pressure fluctuation between 185-195 bar (normal 200 bar). Possible seal wear.,Schuler Hydraulic Press 1000T,Main Cylinder Assembly,High,Open,2026-01-03
+Tool Changer Malfunction,Pneumatic tool changer experiencing intermittent failures. Tools not fully seating in spindle.,Haas VF-2SS CNC Mill,Tool Changer Mechanism,Medium,Open,2025-12-30
+Robot Arm Joint Overheating,J2 shoulder joint motor temperature increased to 85°C. Normal operating temp is 60°C.,FANUC R-2000iC Robot Welder,Robot Arm J2 Motor,Medium,In Progress,2026-01-02
+Compressor Oil Level Low,Compressor Unit 1 showing low oil level warning. Oil consumption higher than normal.,Carrier 30RB Chiller System,Compressor Unit 1,Low,Open,2025-12-28
+EDM Dielectric Pump Issue,Dielectric circulation pump showing reduced flow rate. Flow at 16 L/min vs 20 L/min normal.,Mitsubishi MV2400S EDM,Dielectric Pump,Medium,Open,2026-01-01
+Press Brake Back Gauge Drift,R-axis servo motor encoder showing drift. Angle positioning accuracy degraded by 0.5°.,Amada HFE 220-4 Press Brake,Back Gauge Motor R,Low,In Progress,2025-12-29
+Lathe Sub-Spindle Misalignment,Sub-spindle alignment issue causing part transfer problems. Runout measured at 0.15mm.,DMG MORI NLX 2500 Lathe,Sub-Spindle Unit,High,Open,2026-01-02
+5-Axis Table Backlash,B-axis rotary table showing backlash of 0.08°. Affecting part accuracy.,Mazak VARIAXIS i-700,Rotary Table B-Axis,Medium,Open,2026-01-01
+Robot Wrist Motor Failure,M5 wrist motor bearing failure detected. Abnormal noise and vibration present.,ABB IRB 6700 Assembly Robot,Robot Wrist Motor M5,High,In Progress,2026-01-03
+Chip Conveyor Jam,Main chip conveyor system jammed with chips. Manual clearing required.,Mazak VARIAXIS i-700,Chip Management System,High,Open,2026-01-03
+Coolant System Contamination,Coolant showing signs of contamination. pH at 8.5 vs 9.2 normal. Bacterial growth suspected.,Haas VF-2SS CNC Mill,Coolant Circulation Pump,Low,Open,2025-12-27
+Servo Drive Communication Error,X-axis servo drive intermittent communication errors with PLC. 3 faults in past week.,Haas VF-2SS CNC Mill,Servo Drive X-Axis,Medium,In Progress,2026-01-01
+Hydraulic Filtration Overdue,Oil filtration system filter pressure differential at 4.5 bar. Service recommended at 4 bar.,Schuler Hydraulic Press 1000T,Oil Filtration Unit,Low,Open,2025-12-31
+Vision System Calibration Drift,Cognex vision system showing calibration drift. Part recognition accuracy at 92% vs 98% normal.,FANUC R-2000iC Robot Welder,Vision System Camera,Medium,Open,2025-12-30
+Turret Indexing Delay,Tool turret indexing time increased from 1.2s to 2.8s. Stepper motor performance degraded.,Okuma LB3000 EX II Lathe,Turret Indexing Motor,Low,In Progress,2025-12-28
+Pneumatic Gripper Leak,Assembly robot gripper showing air pressure leak. Grip force reduced to 85% normal.,ABB IRB 6700 Assembly Robot,Pneumatic Gripper,Medium,Open,2026-01-02
+Chiller Condenser Fan Noise,Unusual bearing noise from condenser fan motor. Vibration increased.,Carrier 30RB Chiller System,Condenser Fan Motor 1,Low,Open,2025-12-29
+EDM Spark Generator Fault,Power supply showing voltage fluctuation. Spark stability affected.,Mitsubishi MV2400S EDM,Spark Generator,High,In Progress,2026-01-01

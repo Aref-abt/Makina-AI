@@ -272,8 +272,21 @@ class _Machine3DViewerState extends State<Machine3DViewer>
   }
 
   Widget _build3DMachine(bool isDark) {
-    final machine =
-        _mockData.machines.firstWhere((m) => m.id == widget.machineId);
+    final machine = _mockData.machines.firstWhere(
+      (m) => m.id == widget.machineId,
+      orElse: () => _mockData.machines.isNotEmpty
+          ? _mockData.machines.first
+          : MachineModel(
+              id: widget.machineId,
+              name: 'Unknown Machine',
+              type: 'General Equipment',
+              manufacturer: 'Unknown',
+              model: 'N/A',
+              location: 'Floor 1',
+              floor: 'Floor 1',
+              installationDate: DateTime.now(),
+            ),
+    );
     final String imagePath = _getMachineImagePath(machine.type);
     // Prefer a 3D model asset named after the machine id (assets/models/<machineId>.glb or .gltf).
     // If present, show a ModelViewer for true 3D rotation; otherwise fall back to the SVG image.
@@ -296,11 +309,9 @@ class _Machine3DViewerState extends State<Machine3DViewer>
             height: 320,
             child: ModelViewer(
               src: modelPath,
-              autoRotate: false,
+              autoRotate: true,
               cameraControls: true,
               alt: machine.name,
-              loading: Loading.eager,
-              disableZoom: false,
             ),
           );
           return Stack(
@@ -605,9 +616,17 @@ class _Machine3DViewerState extends State<Machine3DViewer>
   }
 
   void _showComponentDetails(String componentId) {
-    final component = components.firstWhere((c) => c.id == componentId);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    try {
+      final component = components.firstWhere((c) => c.id == componentId);
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      _showComponentDetailsModal(component, isDark);
+    } catch (e) {
+      // Component not found, ignore
+      return;
+    }
+  }
 
+  void _showComponentDetailsModal(ComponentModel component, bool isDark) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

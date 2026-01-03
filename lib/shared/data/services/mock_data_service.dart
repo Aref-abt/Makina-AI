@@ -1,5 +1,6 @@
 import 'dart:math';
 import '../models/models.dart';
+import 'data_import_service.dart';
 
 class MockDataService {
   static final MockDataService _instance = MockDataService._internal();
@@ -7,6 +8,31 @@ class MockDataService {
   MockDataService._internal();
 
   final Random _random = Random();
+  final _importService = DataImportService();
+
+  // Combine imported machines with mock data
+  List<MachineModel> get machines {
+    return [..._mockMachines, ..._importService.importedMachines];
+  }
+
+  // Combine imported tickets with mock data
+  List<TicketModel> get tickets {
+    return [..._mockTickets, ..._importService.importedTickets];
+  }
+
+  // Combine imported components with mock data
+  List<ComponentModel> get components {
+    return [..._mockComponents, ..._importService.importedComponents];
+  }
+
+  // Generate mock components on the fly
+  List<ComponentModel> get _mockComponents {
+    final allComponents = <ComponentModel>[];
+    for (final machine in _mockMachines) {
+      allComponents.addAll(getMachineComponents(machine.id));
+    }
+    return allComponents;
+  }
 
   // Mock Users
   List<UserModel> users = [
@@ -68,7 +94,7 @@ class MockDataService {
   ];
 
   // Mock Machines
-  final List<MachineModel> machines = [
+  final List<MachineModel> _mockMachines = [
     MachineModel(
       id: 'machine_001',
       name: 'CNC Machine Alpha',
@@ -255,10 +281,10 @@ class MockDataService {
   }
 
   // Mock Tickets
-  List<TicketModel> tickets = [];
+  List<TicketModel> _mockTickets = [];
 
   void initializeTickets() {
-    tickets = [
+    _mockTickets = [
       TicketModel(
         id: 'ticket_001',
         title: 'Critical: Spindle Motor Overheating',

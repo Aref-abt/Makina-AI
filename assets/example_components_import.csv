@@ -1,0 +1,51 @@
+Component Name,Type,Machine,Status,Location,Description
+Main Spindle Motor,Motor,Haas VF-2SS CNC Mill,Warning,Center Top,15kW AC servo motor driving main spindle - rated at 8000 RPM
+Spindle Bearing Assembly,Bearing,Haas VF-2SS CNC Mill,Critical,Spindle Housing,High-precision angular contact bearings - SKF 71915 series
+Coolant Circulation Pump,Pump,Haas VF-2SS CNC Mill,Healthy,Right Bottom,Grundfos CR 10-3 centrifugal pump - 3 phase 380V
+Ball Screw X-Axis,Linear Motion,Haas VF-2SS CNC Mill,Healthy,X-Axis Assembly,THK BNF2005-3.6 ball screw with nut
+Servo Drive X-Axis,Drive System,Haas VF-2SS CNC Mill,Healthy,Control Cabinet,Allen Bradley Kinetix 5500 servo drive
+Tool Changer Mechanism,Mechanical Assembly,Haas VF-2SS CNC Mill,Warning,Tool Magazine,40-position automatic tool changer - pneumatic actuated
+Hydraulic Power Unit,Hydraulic System,Schuler Hydraulic Press 1000T,Healthy,Base Frame,200 bar pressure system - Parker PV series pump
+Main Cylinder Assembly,Hydraulic Cylinder,Schuler Hydraulic Press 1000T,Warning,Press Frame,1000 ton capacity double-acting cylinder
+Pressure Sensors Array,Sensor,Schuler Hydraulic Press 1000T,Healthy,Cylinder Head,Bosch Rexroth HM20 pressure transducers
+Oil Filtration Unit,Filtration System,Schuler Hydraulic Press 1000T,Healthy,Hydraulic Tank,Parker Hannifin 10-micron filtration system
+Robot Arm J1 Motor,Servo Motor,FANUC R-2000iC Robot Welder,Healthy,Base Joint,FANUC αiF 22/2000 servo motor
+Robot Arm J2 Motor,Servo Motor,FANUC R-2000iC Robot Welder,Warning,Shoulder Joint,FANUC αiF 22/2000 servo motor - increased temperature
+Welding Torch Assembly,Welding Equipment,FANUC R-2000iC Robot Welder,Healthy,End Effector,Miller Electric TIG torch with auto-feed wire system
+Robot Controller RJ3iC,Control System,FANUC R-2000iC Robot Welder,Healthy,Control Cabinet,FANUC RJ3iC controller with R-30iB mate software
+Vision System Camera,Vision Sensor,FANUC R-2000iC Robot Welder,Healthy,Wrist Mount,Cognex In-Sight 7000 series vision system
+Main Spindle Motor,Motor,Okuma LB3000 EX II Lathe,Healthy,Spindle Assembly,22kW AC induction motor - Okuma BL-MC200J series
+Chuck Actuator,Hydraulic Actuator,Okuma LB3000 EX II Lathe,Healthy,Chuck Assembly,Kitagawa BB-210 power chuck with hydraulic actuation
+Turret Indexing Motor,Stepper Motor,Okuma LB3000 EX II Lathe,Warning,Tool Turret,12-position turret with Okuma stepper drive
+Tailstock Quill Motor,Motor,Okuma LB3000 EX II Lathe,Healthy,Tailstock Assembly,Servo motor for tailstock quill positioning
+Chip Conveyor System,Conveyor,Okuma LB3000 EX II Lathe,Healthy,Machine Base,Hinged steel belt chip conveyor - 500mm wide
+Robot Wrist Motor M4,Servo Motor,ABB IRB 6700 Assembly Robot,Healthy,Wrist Assembly,ABB DSQC639 servo motor unit
+Robot Wrist Motor M5,Servo Motor,ABB IRB 6700 Assembly Robot,Critical,Wrist Assembly,ABB DSQC639 servo motor - bearing failure detected
+Robot Wrist Motor M6,Servo Motor,ABB IRB 6700 Assembly Robot,Healthy,Wrist Assembly,ABB DSQC639 servo motor unit
+Pneumatic Gripper,End Effector,ABB IRB 6700 Assembly Robot,Healthy,Tool Flange,Schunk PGN-plus 100 parallel gripper
+Robot Base Structure,Structural,ABB IRB 6700 Assembly Robot,Healthy,Base Platform,Cast iron base with vibration dampening mounts
+Compressor Unit 1,Compressor,Carrier 30RB Chiller System,Warning,Compressor Section,Carrier 06E screw compressor - oil level low
+Compressor Unit 2,Compressor,Carrier 30RB Chiller System,Healthy,Compressor Section,Carrier 06E screw compressor - standby unit
+Evaporator Heat Exchanger,Heat Exchanger,Carrier 30RB Chiller System,Healthy,Evaporator Section,Flooded type shell-and-tube evaporator
+Condenser Fan Motor 1,Motor,Carrier 30RB Chiller System,Healthy,Condenser Section,3-phase 5.5kW condenser fan motor
+Refrigerant Level Sensor,Sensor,Carrier 30RB Chiller System,Healthy,Refrigerant Circuit,Danfoss EKC pressure/level transmitter
+EDM Electrode Feed Motor,Servo Motor,Mitsubishi MV2400S EDM,Healthy,Electrode Head,Mitsubishi MDS-D-SVJ3 servo motor
+Dielectric Pump,Pump,Mitsubishi MV2400S EDM,Warning,Dielectric Tank,20 L/min dielectric fluid circulation pump
+Spark Generator,Power Supply,Mitsubishi MV2400S EDM,Healthy,Control Cabinet,Mitsubishi M730 series EDM power supply
+Dielectric Filtration System,Filter,Mitsubishi MV2400S EDM,Healthy,Filtration Unit,5-micron cartridge filter with auto-backwash
+Work Tank Assembly,Structural,Mitsubishi MV2400S EDM,Healthy,Machine Base,Stainless steel work tank - 800L capacity
+Ram Hydraulic Cylinder,Hydraulic Cylinder,Amada HFE 220-4 Press Brake,Healthy,Ram Assembly,220-ton capacity hydraulic cylinders (dual)
+Back Gauge Motor X,Servo Motor,Amada HFE 220-4 Press Brake,Healthy,Back Gauge,X-axis positioning servo for back gauge
+Back Gauge Motor R,Servo Motor,Amada HFE 220-4 Press Brake,Warning,Back Gauge,R-axis (angle) positioning servo - encoder drift
+Crowning System,Hydraulic System,Amada HFE 220-4 Press Brake,Healthy,Ram,Automatic crowning compensation system
+Tool Clamping System,Mechanical,Amada HFE 220-4 Press Brake,Healthy,Ram/Table,Amada PROMECAM quick-change tooling system
+Main Spindle Unit,Spindle,DMG MORI NLX 2500 Lathe,Healthy,Main Spindle,Built-in motor spindle - 5000 RPM max
+Sub-Spindle Unit,Spindle,DMG MORI NLX 2500 Lathe,Warning,Sub-Spindle,Counter spindle for part transfer - alignment issue
+Y-Axis Milling Motor,Motor,DMG MORI NLX 2500 Lathe,Healthy,Y-Axis Assembly,Milling motor for Y-axis machining - 18kW
+Barfeeder Interface,Material Handling,DMG MORI NLX 2500 Lathe,Healthy,Machine Rear,Interface for LNS Quick Load barfeeder
+Tool Turret Lower,Tool Holder,DMG MORI NLX 2500 Lathe,Healthy,Lower Turret,BMT 65 turret with live tooling - 12 stations
+Spindle Motor A-Axis,Motor,Mazak VARIAXIS i-700,Healthy,Spindle Head,Built-in 26kW spindle motor
+Rotary Table B-Axis,Rotary Table,Mazak VARIAXIS i-700,Warning,Table Assembly,Trunnion-style rotary table - backlash detected
+Pallet Changer System,Material Handling,Mazak VARIAXIS i-700,Healthy,Machine Base,Automatic pallet changer - 2-pallet system
+Coolant Through-Spindle,Coolant System,Mazak VARIAXIS i-700,Healthy,Spindle Assembly,70 bar through-spindle coolant system
+Chip Management System,Conveyor,Mazak VARIAXIS i-700,Critical,Machine Base,Chip conveyor jammed - requires immediate service

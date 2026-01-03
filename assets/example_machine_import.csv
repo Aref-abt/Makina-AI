@@ -1,0 +1,11 @@
+Machine Name,Type,Manufacturer,Model,Location,Floor,Installation Date,Cost Per Hour Downtime
+Haas VF-2SS CNC Mill,CNC Milling Machine,Haas Automation,VF-2SS,Bay A1,Floor 1,2020-03-15,850
+Schuler Hydraulic Press 1000T,Hydraulic Press,Schuler AG,TSD 1000,Bay A2,Floor 1,2019-08-20,720
+FANUC R-2000iC Robot Welder,Industrial Robot,FANUC Corporation,R-2000iC/165F,Bay B1,Floor 1,2021-06-10,950
+Okuma LB3000 EX II Lathe,CNC Lathe,Okuma Corporation,LB3000 EX II,Bay B2,Floor 1,2018-11-05,680
+ABB IRB 6700 Assembly Robot,Industrial Robot,ABB Robotics,IRB 6700-300/2.7,Bay C1,Floor 2,2020-09-22,890
+Carrier 30RB Chiller System,HVAC Chiller,Carrier Corporation,30RB-200,Mechanical Room,Floor 2,2017-04-18,1200
+Mitsubishi MV2400S EDM,Electrical Discharge Machine,Mitsubishi Electric,MV2400S,Bay C2,Floor 2,2019-12-01,780
+Amada HFE 220-4 Press Brake,Press Brake,Amada Co.,HFE 220-4,Bay D1,Floor 2,2018-07-14,650
+DMG MORI NLX 2500 Lathe,Multi-Axis CNC Lathe,DMG MORI,NLX 2500/700,Bay D2,Floor 3,2021-01-28,920
+Mazak VARIAXIS i-700,5-Axis Machining Center,Mazak Corporation,VARIAXIS i-700,Bay E1,Floor 3,2020-05-16,1050
