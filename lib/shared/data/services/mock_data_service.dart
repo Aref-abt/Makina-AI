@@ -1,14 +1,30 @@
 import 'dart:math';
 import '../models/models.dart';
 import 'data_import_service.dart';
+import 'ml_service.dart';
 
 class MockDataService {
   static final MockDataService _instance = MockDataService._internal();
   factory MockDataService() => _instance;
-  MockDataService._internal();
+  MockDataService._internal() {
+    // Initialize ML service with data
+    _trainMLModel();
+  }
 
   final Random _random = Random();
   final _importService = DataImportService();
+  final _mlService = MLService();
+  bool _isMLTrained = false;
+
+  void _trainMLModel() {
+    if (!_isMLTrained) {
+      // Train ML model on startup with existing data
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _mlService.trainOnTicketData(tickets, components);
+        _isMLTrained = true;
+      });
+    }
+  }
 
   // Combine imported machines with mock data
   List<MachineModel> get machines {
@@ -444,54 +460,110 @@ class MockDataService {
     ];
   }
 
-  // Get AI Insight for a ticket
+  // Get AI Insight for a ticket using REAL ML predictions
   AIInsightModel getAIInsight(String ticketId) {
     final ticket = tickets.firstWhere((t) => t.id == ticketId);
+
+    // Get the actual component for ML analysis
+    final component = ticket.componentId != null
+        ? components.firstWhere((c) => c.id == ticket.componentId,
+            orElse: () => components.isNotEmpty
+                ? components.first
+                : _createDummyComponent())
+        : (components.isNotEmpty ? components.first : _createDummyComponent());
+
+    // 🤖 REAL AI: Run anomaly detection
+    final anomalyResult = _mlService.detectAnomalies(component);
+
+    // 🤖 REAL AI: Calculate failure probability
+    final failureProbability = _mlService.predictFailureProbability(component);
+
+    // 🤖 REAL AI: Predict time to failure
+    final timeToFailure =
+        _mlService.predictTimeToFailure(component, anomalyResult);
+
+    // 🤖 REAL AI: Generate intelligent insights
+    final mlInsight = _mlService.generateInsight(component, anomalyResult);
+
+    // 🤖 REAL AI: Find similar past cases
+    final similarCases = _mlService.findSimilarCases(component, anomalyResult);
+
+    // Convert anomalies to sensor signals
+    final signals = anomalyResult.anomalies.map((anomaly) {
+      return SensorSignal(
+        type: anomaly.sensorType,
+        currentValue: anomaly.currentValue,
+        normalMin: anomaly.expectedValue * 0.8,
+        normalMax: anomaly.expectedValue * 1.2,
+        deviation: anomaly.deviation,
+        unit: _getUnitForSensor(anomaly.sensorType),
+      );
+    }).toList();
+
+    // If no anomalies detected, use component's sensor readings
+    if (signals.isEmpty) {
+      component.sensorReadings.forEach((type, value) {
+        signals.add(SensorSignal(
+          type: type,
+          currentValue: value,
+          normalMin: value * 0.8,
+          normalMax: value * 1.2,
+          deviation: 0.0,
+          unit: _getUnitForSensor(type),
+        ));
+      });
+    }
+
     return AIInsightModel(
       id: 'insight_$ticketId',
       ticketId: ticketId,
       machineId: ticket.machineId,
       componentId: ticket.componentId ?? '',
-      whatIsHappening:
-          'The ${ticket.componentName ?? "component"} is showing abnormal behavior patterns. Sensor readings indicate deviation from normal operating parameters.',
-      whyItMatters:
-          'If left unaddressed, this could lead to component failure within 24-48 hours, causing unplanned downtime and potential damage to connected systems.',
-      potentialCause:
-          'Based on historical data and current sensor patterns, the most likely cause is bearing wear leading to increased friction and heat generation.',
-      confidenceLevel: ticket.aiConfidence ?? 0.75,
-      contributingSignals: [
-        SensorSignal(
-          type: 'Temperature',
-          currentValue: 95.5,
-          normalMin: 60.0,
-          normalMax: 80.0,
-          deviation: 19.4,
-          unit: '°C',
-        ),
-        SensorSignal(
-          type: 'Vibration',
-          currentValue: 8.2,
-          normalMin: 0.0,
-          normalMax: 5.0,
-          deviation: 64.0,
-          unit: 'mm/s',
-        ),
-        SensorSignal(
-          type: 'Current Draw',
-          currentValue: 45.3,
-          normalMin: 30.0,
-          normalMax: 40.0,
-          deviation: 13.25,
-          unit: 'A',
-        ),
-      ],
-      similarPastCases: [
-        'Case #2341 (Jan 2024): Similar vibration pattern resolved with bearing replacement',
-        'Case #1892 (Oct 2023): Motor overheating due to blocked cooling vents',
-      ],
-      uncertaintyNote:
-          'Could also be caused by misalignment. Verify during physical inspection.',
+      whatIsHappening: anomalyResult.hasAnomalies
+          ? 'ML Analysis: ${anomalyResult.anomalies.length} sensor anomalies detected. ${mlInsight.split('\n').first}'
+          : 'All sensors operating within normal parameters. No anomalies detected.',
+      whyItMatters: timeToFailure != null
+          ? 'Predicted failure in ~${timeToFailure} hours. Immediate action recommended to prevent unplanned downtime.'
+          : 'Preventive maintenance recommended to maintain optimal performance.',
+      potentialCause: mlInsight,
+      confidenceLevel: failureProbability,
+      contributingSignals: signals,
+      similarPastCases: similarCases.isNotEmpty
+          ? similarCases
+          : ['No similar historical cases found in database'],
+      uncertaintyNote: anomalyResult.hasAnomalies
+          ? 'ML confidence: ${(failureProbability * 100).toStringAsFixed(1)}%. Verify with physical inspection.'
+          : null,
     );
+  }
+
+  ComponentModel _createDummyComponent() {
+    return ComponentModel(
+      id: 'dummy',
+      machineId: 'unknown',
+      name: 'Unknown Component',
+      type: 'General',
+      healthStatus: HealthStatus.healthy,
+      riskLevel: 0.0,
+      sensorReadings: {'temperature': 65.0, 'vibration': 2.5},
+    );
+  }
+
+  String _getUnitForSensor(String sensorType) {
+    switch (sensorType.toLowerCase()) {
+      case 'temperature':
+        return '°C';
+      case 'vibration':
+        return 'mm/s';
+      case 'current':
+        return 'A';
+      case 'pressure':
+        return 'bar';
+      case 'flowrate':
+        return 'L/min';
+      default:
+        return '';
+    }
   }
 
   // Get ASME Guidelines
