@@ -16,6 +16,9 @@ class MockDataService {
   final _mlService = MLService();
   bool _isMLTrained = false;
 
+  // Calendar reminders storage
+  final List<CalendarReminder> _reminders = [];
+
   void _trainMLModel() {
     if (!_isMLTrained) {
       // Train ML model on startup with existing data
@@ -737,6 +740,32 @@ class MockDataService {
         assigneeName: assignee.fullName,
       );
     }
+  }
+
+  // Calendar Reminder Methods
+  List<CalendarReminder> get reminders => _reminders;
+
+  void addReminder(CalendarReminder reminder) {
+    _reminders.add(reminder);
+  }
+
+  void deleteReminder(String reminderId) {
+    _reminders.removeWhere((r) => r.id == reminderId);
+  }
+
+  void updateReminder(CalendarReminder reminder) {
+    final index = _reminders.indexWhere((r) => r.id == reminder.id);
+    if (index != -1) {
+      _reminders[index] = reminder;
+    }
+  }
+
+  List<CalendarReminder> getRemindersForDate(DateTime date) {
+    return _reminders.where((r) {
+      return r.date.year == date.year &&
+          r.date.month == date.month &&
+          r.date.day == date.day;
+    }).toList();
   }
 
   // Initialize mock data

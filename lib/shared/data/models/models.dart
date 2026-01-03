@@ -614,3 +614,40 @@ extension NoiseLevelExtension on NoiseLevel {
     }
   }
 }
+
+// Calendar Reminder Model
+class CalendarReminder {
+  final String id;
+  final String title;
+  final DateTime date;
+  final String? notes;
+  final DateTime createdAt;
+  final String createdBy;
+
+  CalendarReminder({
+    required this.id,
+    required this.title,
+    required this.date,
+    this.notes,
+    required this.createdAt,
+    required this.createdBy,
+  });
+
+  CalendarReminder copyWith({
+    String? id,
+    String? title,
+    DateTime? date,
+    String? notes,
+    DateTime? createdAt,
+    String? createdBy,
+  }) {
+    return CalendarReminder(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      date: date ?? this.date,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+    );
+  }
+}
