@@ -22,6 +22,7 @@ import '../../features/manager/presentation/screens/reports_screen.dart';
 import '../../features/manager/presentation/screens/settings_screen.dart';
 import '../../features/super_admin/presentation/screens/admin_shell.dart';
 import '../../features/super_admin/presentation/screens/admin_dashboard_screen.dart';
+import '../../features/super_admin/presentation/screens/factory_map_screen.dart';
 import '../../features/super_admin/presentation/screens/user_management_screen.dart';
 import '../../features/super_admin/presentation/screens/add_user_screen.dart';
 
@@ -161,6 +162,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/admin/dashboard',
             builder: (context, state) => const AdminDashboardScreen(),
+          ),
+          GoRoute(
+            path: '/admin/analytics',
+            builder: (context, state) => const AnalyticsScreen(),
+          ),
+          GoRoute(
+            path: '/admin/factory-map',
+            builder: (context, state) => const FactoryMapScreen(),
           ),
           GoRoute(
             path: '/admin/users',

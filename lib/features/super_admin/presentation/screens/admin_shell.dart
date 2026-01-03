@@ -22,6 +22,16 @@ class _AdminShellState extends ConsumerState<AdminShell> {
         label: 'Dashboard',
         path: '/admin/dashboard'),
     _NavItem(
+        icon: Icons.analytics_outlined,
+        activeIcon: Icons.analytics,
+        label: 'Analytics',
+        path: '/admin/analytics'),
+    _NavItem(
+        icon: Icons.location_on_outlined,
+        activeIcon: Icons.location_on,
+        label: 'Factory Map',
+        path: '/admin/factory-map'),
+    _NavItem(
         icon: Icons.people_outline,
         activeIcon: Icons.people,
         label: 'Users',

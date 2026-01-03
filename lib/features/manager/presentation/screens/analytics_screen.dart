@@ -12,11 +12,18 @@ import '../../../../shared/data/services/mock_data_service.dart';
 import '../../../../shared/data/services/export_service.dart';
 import '../../../../shared/data/models/models.dart';
 
-class AnalyticsScreen extends ConsumerWidget {
+class AnalyticsScreen extends ConsumerStatefulWidget {
   const AnalyticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AnalyticsScreen> createState() => _AnalyticsScreenState();
+}
+
+class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
+  String _selectedPeriod = 'Month';
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final tickets = MockDataService().tickets;
 
@@ -85,13 +92,19 @@ class AnalyticsScreen extends ConsumerWidget {
           children: [
             // Time filter
             Row(
-              children: ['Week', 'Month', 'Quarter', 'Year']
+              children: ['Week', 'Month', 'Year']
                   .map((period) => Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: ChoiceChip(
                             label: Text(period),
-                            selected: period == 'Month',
-                            onSelected: (_) {}),
+                            selected: period == _selectedPeriod,
+                            onSelected: (selected) {
+                              if (selected) {
+                                setState(() {
+                                  _selectedPeriod = period;
+                                });
+                              }
+                            }),
                       ))
                   .toList(),
             ),
