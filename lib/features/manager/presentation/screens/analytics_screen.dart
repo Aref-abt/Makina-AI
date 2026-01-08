@@ -21,38 +21,84 @@ class AnalyticsScreen extends ConsumerStatefulWidget {
 
 class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   String _selectedPeriod = 'Month';
+  String? _selectedMachineId;
+  SeverityLevel? _selectedSeverityFilter;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tickets = MockDataService().tickets;
+    final allTickets = MockDataService().tickets;
+    final machines = MockDataService().machines;
 
-    // Compute downtime per day (last 7 days) and response time trend
+    // Apply UI filters (machine / severity)
+    final tickets = allTickets.where((t) {
+      if (_selectedMachineId != null && _selectedMachineId!.isNotEmpty) {
+        if (t.machineId != _selectedMachineId) return false;
+      }
+      if (_selectedSeverityFilter != null) {
+        if (t.severity != _selectedSeverityFilter) return false;
+      }
+      return true;
+    }).toList();
+
+    // Compute downtime and response metrics according to selected period
     final now = DateTime.now();
-    final last7 = List.generate(
-        7,
-        (i) => DateTime(now.year, now.month, now.day)
-            .subtract(Duration(days: 6 - i)));
 
-    List<double> downtimeValues = List.filled(7, 0.0);
-    List<double> responseValues = List.filled(7, 0.0);
-    List<String> labels = last7
-        .map((d) =>
-            ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d.weekday - 1])
-        .toList();
+    List<DateTime> periods = [];
+    List<String> labels = [];
 
-    for (int i = 0; i < last7.length; i++) {
-      final dayStart = last7[i];
-      final dayEnd = dayStart.add(const Duration(days: 1));
-      final dayTickets = tickets.where((t) =>
-          t.createdAt.isAfter(dayStart.subtract(const Duration(seconds: 1))) &&
-          t.createdAt.isBefore(dayEnd));
-      // Downtime: sum estimatedDowntimeMinutes
-      final totalDowntime = dayTickets.fold<double>(
+    if (_selectedPeriod == 'Week') {
+      periods = List.generate(
+          7,
+          (i) => DateTime(now.year, now.month, now.day)
+              .subtract(Duration(days: 6 - i)));
+      labels = periods
+          .map((d) =>
+              ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d.weekday - 1])
+          .toList();
+    } else if (_selectedPeriod == 'Month') {
+      // last 30 days
+      periods = List.generate(
+          30,
+          (i) => DateTime(now.year, now.month, now.day)
+              .subtract(Duration(days: 29 - i)));
+      labels = periods
+          .map((d) => '${d.day}')
+          .toList(); // show day-of-month; we'll hide some labels in the chart
+    } else {
+      // Year: last 12 months
+      periods = List.generate(12, (i) {
+        final dt = DateTime(now.year, now.month, 1)
+            .subtract(Duration(days: 30 * (11 - i)));
+        return DateTime(dt.year, dt.month, 1);
+      });
+      labels = periods
+          .map((d) => DateFormat.MMM().format(d))
+          .toList(); // Jan, Feb, ...
+    }
+
+    List<double> downtimeValues = List.filled(periods.length, 0.0);
+    List<double> responseValues = List.filled(periods.length, 0.0);
+
+    for (int i = 0; i < periods.length; i++) {
+      final start = periods[i];
+      DateTime end;
+      if (_selectedPeriod == 'Year') {
+        end = DateTime(start.year, start.month + 1, 1);
+      } else {
+        end = start.add(const Duration(days: 1));
+      }
+
+      final periodTickets = tickets.where((t) =>
+          t.createdAt.isAfter(start.subtract(const Duration(seconds: 1))) &&
+          t.createdAt.isBefore(end));
+
+      final totalDowntime = periodTickets.fold<double>(
           0.0, (p, t) => p + (t.estimatedDowntimeMinutes ?? 0).toDouble());
       downtimeValues[i] = totalDowntime;
-      // Response time: average (resolvedAt - createdAt) in minutes for resolved tickets
-      final resolved = dayTickets.where((t) => t.resolvedAt != null).toList();
+
+      final resolved =
+          periodTickets.where((t) => t.resolvedAt != null).toList();
       if (resolved.isNotEmpty) {
         final avg = resolved
                 .map((t) => t.resolvedAt!.difference(t.createdAt).inMinutes)
@@ -64,14 +110,31 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       }
     }
 
-    // Fallback to demo data if all values are zero
+    // Fallback demo data sized to the selected period
     final hasDowntimeData = downtimeValues.any((v) => v > 0);
     final hasResponseData = responseValues.any((v) => v > 0);
     if (!hasDowntimeData) {
-      downtimeValues = [45.0, 80.0, 60.0, 120.0, 95.0, 70.0, 55.0];
+      if (_selectedPeriod == 'Week') {
+        downtimeValues = [45.0, 80.0, 60.0, 120.0, 95.0, 70.0, 55.0];
+        labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      } else if (_selectedPeriod == 'Month') {
+        downtimeValues = List.generate(
+            30, (i) => [45.0, 80.0, 60.0, 120.0, 95.0, 70.0, 55.0][i % 7]);
+      } else {
+        downtimeValues =
+            List.generate(12, (i) => [120.0, 95.0, 80.0, 110.0][i % 4]);
+      }
     }
     if (!hasResponseData) {
-      responseValues = [120.0, 90.0, 135.0, 75.0, 60.0, 95.0, 80.0];
+      if (_selectedPeriod == 'Week') {
+        responseValues = [120.0, 90.0, 135.0, 75.0, 60.0, 95.0, 80.0];
+      } else if (_selectedPeriod == 'Month') {
+        responseValues = List.generate(
+            30, (i) => [120.0, 90.0, 135.0, 75.0, 60.0, 95.0, 80.0][i % 7]);
+      } else {
+        responseValues =
+            List.generate(12, (i) => [90.0, 100.0, 110.0, 95.0][i % 4]);
+      }
     }
     return Scaffold(
       backgroundColor:
@@ -90,6 +153,34 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Machine selector
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedMachineId,
+                    decoration:
+                        const InputDecoration(labelText: 'Machine (All)'),
+                    items: [
+                      const DropdownMenuItem(
+                          value: null, child: Text('All Machines')),
+                      ...machines.map((m) => DropdownMenuItem(
+                          value: m.id, child: Text('${m.name} — ${m.floor}')))
+                    ],
+                    onChanged: (v) => setState(() => _selectedMachineId = v),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                if (_selectedMachineId != null)
+                  TextButton(
+                    onPressed: () => setState(() {
+                      _selectedMachineId = null;
+                    }),
+                    child: const Text('Clear'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 16),
             // Time filter
             Row(
               children: ['Week', 'Month', 'Year']
@@ -122,29 +213,58 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
                     maxY: downtimeValues.reduce((a, b) => a > b ? a : b) * 1.2,
-                    barTouchData: BarTouchData(enabled: true),
+                    barTouchData: BarTouchData(
+                      enabled: true,
+                      touchTooltipData: BarTouchTooltipData(
+                        tooltipBgColor:
+                            isDark ? AppColors.darkSurface : AppColors.white,
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final idx = group.x.toInt();
+                          final label = (idx >= 0 && idx < labels.length)
+                              ? labels[idx]
+                              : '';
+                          return BarTooltipItem(
+                            '$label\n${rod.toY.toStringAsFixed(0)} min',
+                            TextStyle(
+                                color: isDark
+                                    ? AppColors.lightText
+                                    : Colors.black),
+                          );
+                        },
+                      ),
+                    ),
                     titlesData: FlTitlesData(
                       show: true,
                       bottomTitles: AxisTitles(
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            if (value.toInt() >= 0 &&
-                                value.toInt() < labels.length) {
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  labels[value.toInt()],
-                                  style: TextStyle(
-                                    color: isDark
-                                        ? AppColors.darkTextSecondary
-                                        : AppColors.lightTextSecondary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              );
+                            final idx = value.toInt();
+                            if (idx < 0 || idx >= labels.length)
+                              return const Text('');
+
+                            // Reduce label density for Month view: show every 5th day
+                            if (_selectedPeriod == 'Month') {
+                              if (labels.length > 15 &&
+                                  idx % 5 != 0 &&
+                                  idx != labels.length - 1) {
+                                return const Text('');
+                              }
                             }
-                            return const Text('');
+
+                            // For Week and Year show all labels (months are short)
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                labels[idx],
+                                style: TextStyle(
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            );
                           },
                         ),
                       ),
@@ -206,21 +326,192 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            // Small stats + charts: responsive layout for mobile
+            Builder(builder: (ctx) {
+              final w = MediaQuery.of(ctx).size.width;
+              final isNarrow = w <= AppDimensions.mobileBreakpoint;
+              if (isNarrow) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Resolution Metrics', style: AppTextStyles.h6),
+                    const SizedBox(height: 12),
+                    Builder(builder: (_) {
+                      final totalWithFeedback =
+                          tickets.where((t) => t.feedback != null).length;
+                      final found = tickets
+                          .where((t) =>
+                              t.feedback?.verification ==
+                              IssueVerification.issueFound)
+                          .length;
+                      final notFound = tickets
+                          .where((t) =>
+                              t.feedback?.verification ==
+                              IssueVerification.issueNotFound)
+                          .length;
+                      final foundPct = totalWithFeedback > 0
+                          ? ((found / totalWithFeedback) * 100).round()
+                          : 0;
+                      final notFoundPct = totalWithFeedback > 0
+                          ? ((notFound / totalWithFeedback) * 100).round()
+                          : 0;
 
-            // Resolution Metrics
-            Text('Resolution Metrics', style: AppTextStyles.h6),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                    child: _buildMetricCard('Issue Found', '78%',
-                        Icons.check_circle, AppColors.healthy, isDark)),
-                const SizedBox(width: 12),
-                Expanded(
-                    child: _buildMetricCard('Issue Not Found', '22%',
-                        Icons.help, AppColors.warning, isDark)),
-              ],
-            ),
+                      return Row(
+                        children: [
+                          Expanded(
+                              child: _buildMetricCard(
+                                  'Issue Found',
+                                  '${foundPct}%',
+                                  Icons.check_circle,
+                                  AppColors.healthy,
+                                  isDark)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                              child: _buildMetricCard(
+                                  'Issue Not Found',
+                                  '${notFoundPct}%',
+                                  Icons.help,
+                                  AppColors.warning,
+                                  isDark)),
+                        ],
+                      );
+                    }),
+                    const SizedBox(height: 16),
+                    Text('Severity Distribution', style: AppTextStyles.h6),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      height: 160,
+                      child: Center(
+                        child: PieChart(
+                          PieChartData(
+                            sections: _buildSeveritySections(tickets),
+                            centerSpaceRadius: 28,
+                            sectionsSpace: 2,
+                            pieTouchData: PieTouchData(
+                              touchCallback: (event, response) {
+                                if (response == null ||
+                                    response.touchedSection == null) return;
+                                final idx = response
+                                    .touchedSection!.touchedSectionIndex;
+                                setState(() {
+                                  _selectedSeverityFilter =
+                                      SeverityLevel.values[idx];
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    if (_selectedSeverityFilter != null)
+                      TextButton(
+                          onPressed: () =>
+                              setState(() => _selectedSeverityFilter = null),
+                          child: const Text('Clear severity filter'))
+                  ],
+                );
+              }
+
+              // Wide layout: original side-by-side
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Resolution Metrics', style: AppTextStyles.h6),
+                          const SizedBox(height: 12),
+                          Builder(builder: (_) {
+                            final totalWithFeedback =
+                                tickets.where((t) => t.feedback != null).length;
+                            final found = tickets
+                                .where((t) =>
+                                    t.feedback?.verification ==
+                                    IssueVerification.issueFound)
+                                .length;
+                            final notFound = tickets
+                                .where((t) =>
+                                    t.feedback?.verification ==
+                                    IssueVerification.issueNotFound)
+                                .length;
+                            final foundPct = totalWithFeedback > 0
+                                ? ((found / totalWithFeedback) * 100).round()
+                                : 0;
+                            final notFoundPct = totalWithFeedback > 0
+                                ? ((notFound / totalWithFeedback) * 100).round()
+                                : 0;
+
+                            return Row(
+                              children: [
+                                Expanded(
+                                    child: _buildMetricCard(
+                                        'Issue Found',
+                                        '${foundPct}%',
+                                        Icons.check_circle,
+                                        AppColors.healthy,
+                                        isDark)),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                    child: _buildMetricCard(
+                                        'Issue Not Found',
+                                        '${notFoundPct}%',
+                                        Icons.help,
+                                        AppColors.warning,
+                                        isDark)),
+                              ],
+                            );
+                          })
+                        ],
+                      )),
+
+                  const SizedBox(width: 12),
+
+                  // Severity distribution pie
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Severity Distribution', style: AppTextStyles.h6),
+                        const SizedBox(height: 8),
+                        Container(
+                          height: 120,
+                          child: PieChart(
+                            PieChartData(
+                              sections: _buildSeveritySections(tickets),
+                              centerSpaceRadius: 28,
+                              sectionsSpace: 2,
+                              pieTouchData: PieTouchData(
+                                touchCallback: (event, response) {
+                                  if (response == null ||
+                                      response.touchedSection == null) return;
+                                  final idx = response
+                                      .touchedSection!.touchedSectionIndex;
+                                  setState(() {
+                                    _selectedSeverityFilter =
+                                        SeverityLevel.values[idx];
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        if (_selectedSeverityFilter != null)
+                          TextButton(
+                              onPressed: () => setState(
+                                  () => _selectedSeverityFilter = null),
+                              child: const Text('Clear severity filter'))
+                      ],
+                    ),
+                  ),
+                ],
+              );
+            }),
             const SizedBox(height: 24),
 
             // AI Performance
@@ -232,14 +523,47 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 padding: const EdgeInsets.all(AppDimensions.paddingL),
                 child: Column(
                   children: [
-                    _buildProgressRow(
-                        'AI Accuracy', 0.87, AppColors.healthy, isDark),
-                    const SizedBox(height: 16),
-                    _buildProgressRow(
-                        'False Positive Rate', 0.12, AppColors.warning, isDark),
-                    const SizedBox(height: 16),
-                    _buildProgressRow('Technician Confirmation', 0.91,
-                        AppColors.info, isDark),
+                    Builder(builder: (_) {
+                      final aiTickets = allTickets
+                          .where((t) => t.aiConfidence != null)
+                          .toList();
+                      final avgConfidence = aiTickets.isNotEmpty
+                          ? (aiTickets
+                                  .map((t) => t.aiConfidence!)
+                                  .reduce((a, b) => a + b) /
+                              aiTickets.length)
+                          : 0.0;
+                      final falsePositives = aiTickets
+                          .where((t) =>
+                              (t.aiConfidence ?? 0) > 0.5 &&
+                              t.feedback?.verification ==
+                                  IssueVerification.issueNotFound)
+                          .length;
+                      final fpRate = aiTickets.isNotEmpty
+                          ? (falsePositives / aiTickets.length)
+                          : 0.0;
+                      final confirmed = aiTickets
+                          .where((t) =>
+                              t.feedback?.verification ==
+                              IssueVerification.issueFound)
+                          .length;
+                      final techConfirm = aiTickets.isNotEmpty
+                          ? (confirmed / aiTickets.length)
+                          : 0.0;
+
+                      return Column(
+                        children: [
+                          _buildProgressRow('AI Accuracy', avgConfidence,
+                              AppColors.healthy, isDark),
+                          const SizedBox(height: 16),
+                          _buildProgressRow('False Positive Rate', fpRate,
+                              AppColors.warning, isDark),
+                          const SizedBox(height: 16),
+                          _buildProgressRow('Technician Confirmation',
+                              techConfirm, AppColors.info, isDark),
+                        ],
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -258,7 +582,28 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                   LineChartData(
                     maxY: responseValues.reduce((a, b) => a > b ? a : b) * 1.2,
                     minY: 0,
-                    lineTouchData: LineTouchData(enabled: true),
+                    lineTouchData: LineTouchData(
+                      enabled: true,
+                      handleBuiltInTouches: true,
+                      touchTooltipData: LineTouchTooltipData(
+                        tooltipBgColor:
+                            isDark ? AppColors.darkSurface : AppColors.white,
+                        getTooltipItems: (touchedSpots) {
+                          return touchedSpots.map((spot) {
+                            final idx = spot.x.toInt();
+                            final label = (idx >= 0 && idx < labels.length)
+                                ? labels[idx]
+                                : '';
+                            return LineTooltipItem(
+                                '$label\n${spot.y.toStringAsFixed(0)} min',
+                                TextStyle(
+                                    color: isDark
+                                        ? AppColors.lightText
+                                        : Colors.black));
+                          }).toList();
+                        },
+                      ),
+                    ),
                     gridData: FlGridData(
                       show: true,
                       drawVerticalLine: false,
@@ -278,22 +623,30 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            if (value.toInt() >= 0 &&
-                                value.toInt() < labels.length) {
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  labels[value.toInt()],
-                                  style: TextStyle(
-                                    color: isDark
-                                        ? AppColors.darkTextSecondary
-                                        : AppColors.lightTextSecondary,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              );
+                            final idx = value.toInt();
+                            if (idx < 0 || idx >= labels.length)
+                              return const Text('');
+
+                            if (_selectedPeriod == 'Month') {
+                              if (labels.length > 15 &&
+                                  idx % 5 != 0 &&
+                                  idx != labels.length - 1) {
+                                return const Text('');
+                              }
                             }
-                            return const Text('');
+
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                labels[idx],
+                                style: TextStyle(
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            );
                           },
                         ),
                       ),
@@ -328,6 +681,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                               FlSpot(index.toDouble(), responseValues[index]),
                         ),
                         isCurved: true,
+                        curveSmoothness: 0.2,
                         color: AppColors.primaryDarkGreen,
                         barWidth: 3,
                         isStrokeCapRound: true,
@@ -475,6 +829,43 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         ],
       ),
     );
+  }
+
+  List<PieChartSectionData> _buildSeveritySections(List<TicketModel> tickets) {
+    final counts = <SeverityLevel, int>{};
+    for (final s in SeverityLevel.values) counts[s] = 0;
+    for (final t in tickets) {
+      counts[t.severity] = (counts[t.severity] ?? 0) + 1;
+    }
+
+    final total = counts.values.fold<int>(0, (a, b) => a + b);
+    final colors = {
+      SeverityLevel.high: AppColors.critical,
+      SeverityLevel.medium: AppColors.warning,
+      SeverityLevel.low: AppColors.healthy,
+    };
+
+    final sections = <PieChartSectionData>[];
+    for (int i = 0; i < SeverityLevel.values.length; i++) {
+      final sev = SeverityLevel.values[i];
+      final cnt = counts[sev] ?? 0;
+      final value = cnt.toDouble();
+      if (value <= 0) {
+        sections
+            .add(PieChartSectionData(value: 0, color: colors[sev]!, title: ''));
+        continue;
+      }
+      final pct = total > 0 ? ((value / total) * 100) : 0.0;
+      sections.add(PieChartSectionData(
+        value: value,
+        color: colors[sev]!,
+        title: '${pct.toStringAsFixed(0)}%',
+        radius: 36,
+        titleStyle: const TextStyle(
+            fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+      ));
+    }
+    return sections;
   }
 
   Widget _buildProgressRow(

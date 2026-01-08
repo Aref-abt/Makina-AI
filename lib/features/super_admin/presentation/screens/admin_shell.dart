@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../shared/widgets/app_logo.dart';
+import '../../../../shared/data/services/auth_service.dart';
 
 class AdminShell extends ConsumerStatefulWidget {
   final Widget child;
@@ -84,7 +85,35 @@ class _AdminShellState extends ConsumerState<AdminShell> {
               thickness: 1,
               width: 1,
               color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
-          Expanded(child: widget.child),
+          Expanded(
+              child: Stack(
+            children: [
+              widget.child,
+              Positioned(
+                top: MediaQuery.of(context).padding.top + kToolbarHeight + 8,
+                right: 12,
+                child: SafeArea(
+                  child: CircleAvatar(
+                    backgroundColor:
+                        isDark ? AppColors.darkSurface : AppColors.white,
+                    radius: 18,
+                    child: IconButton(
+                      icon: Icon(Icons.logout,
+                          size: 18,
+                          color: isDark
+                              ? AppColors.lightText
+                              : AppColors.darkText),
+                      onPressed: () async {
+                        await ref.read(authServiceProvider).signOut();
+                        if (!mounted) return;
+                        context.go('/login');
+                      },
+                    ),
+                  ),
+                ),
+              )
+            ],
+          )),
         ],
       ),
     );

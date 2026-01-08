@@ -70,7 +70,8 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
     }
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
+      backgroundColor:
+          isDark ? AppColors.darkBackground : AppColors.lightBackground,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -157,7 +158,8 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    if (currentTicket.severity == SeverityLevel.high)
+                                    if (currentTicket.severity ==
+                                        SeverityLevel.high)
                                       const Padding(
                                         padding: EdgeInsets.only(right: 6),
                                         child: Icon(
@@ -262,9 +264,8 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
                   labelColor: isDark
                       ? AppColors.primaryLightGreen
                       : AppColors.primaryDarkGreen,
-                  unselectedLabelColor: isDark
-                      ? AppColors.darkTextSecondary
-                      : AppColors.grey,
+                  unselectedLabelColor:
+                      isDark ? AppColors.darkTextSecondary : AppColors.grey,
                   indicatorColor: isDark
                       ? AppColors.primaryLightGreen
                       : AppColors.primaryDarkGreen,
@@ -292,6 +293,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
             Machine3DViewer(
               machineId: currentTicket.machineId,
               highlightedComponentId: currentTicket.componentId,
+              ticketId: currentTicket.id,
             ),
 
             // AI Insights Tab
@@ -308,11 +310,13 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomActions(currentTicket, currentUser, isDark),
+      bottomNavigationBar:
+          _buildBottomActions(currentTicket, currentUser, isDark),
     );
   }
 
-  Widget _buildActionsTab(TicketModel ticket, UserModel? currentUser, bool isDark) {
+  Widget _buildActionsTab(
+      TicketModel ticket, UserModel? currentUser, bool isDark) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppDimensions.paddingL),
       child: Column(
@@ -337,7 +341,8 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
     );
   }
 
-  Widget _buildBottomActions(TicketModel ticket, UserModel? currentUser, bool isDark) {
+  Widget _buildBottomActions(
+      TicketModel ticket, UserModel? currentUser, bool isDark) {
     return Container(
       padding: EdgeInsets.fromLTRB(
         AppDimensions.paddingL,
@@ -428,9 +433,9 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
 
     _mockData.updateTicketStatus(ticket.id, TicketStatus.inProgress);
     _mockData.assignTicket(ticket.id, currentUser.id);
-    
+
     ref.read(ticketsProvider.notifier).state = List.from(_mockData.tickets);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('You are now responding to this ticket'),
@@ -445,7 +450,8 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resolve Ticket'),
-        content: const Text('Are you sure you want to mark this ticket as resolved?'),
+        content: const Text(
+            'Are you sure you want to mark this ticket as resolved?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -454,7 +460,8 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
           ElevatedButton(
             onPressed: () {
               _mockData.updateTicketStatus(ticket.id, TicketStatus.done);
-              ref.read(ticketsProvider.notifier).state = List.from(_mockData.tickets);
+              ref.read(ticketsProvider.notifier).state =
+                  List.from(_mockData.tickets);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -514,7 +521,8 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
                     final tech = technicians[index];
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: AppColors.primaryDarkGreen.withOpacity(0.2),
+                        backgroundColor:
+                            AppColors.primaryDarkGreen.withOpacity(0.2),
                         child: Text(
                           tech.fullName.substring(0, 1),
                           style: const TextStyle(
@@ -531,7 +539,7 @@ class _TicketDetailScreenState extends ConsumerState<TicketDetailScreen>
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
                         _mockData.assignTicket(widget.ticketId, tech.id);
-                        ref.read(ticketsProvider.notifier).state = 
+                        ref.read(ticketsProvider.notifier).state =
                             List.from(_mockData.tickets);
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(

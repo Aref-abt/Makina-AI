@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../shared/data/services/auth_service.dart';
 
 class TechnicianShell extends ConsumerStatefulWidget {
   final Widget child;
@@ -77,18 +78,15 @@ class _TechnicianShellState extends ConsumerState<TechnicianShell> {
                 context.go(_navItems[index].path);
               },
               labelType: NavigationRailLabelType.all,
-              backgroundColor: isDark
-                  ? AppColors.darkSurface
-                  : AppColors.lightSurface,
+              backgroundColor:
+                  isDark ? AppColors.darkSurface : AppColors.lightSurface,
               selectedIconTheme: IconThemeData(
                 color: isDark
                     ? AppColors.primaryLightGreen
                     : AppColors.primaryDarkGreen,
               ),
               unselectedIconTheme: IconThemeData(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.grey,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.grey,
               ),
               selectedLabelTextStyle: TextStyle(
                 color: isDark
@@ -97,9 +95,7 @@ class _TechnicianShellState extends ConsumerState<TechnicianShell> {
                 fontWeight: FontWeight.w600,
               ),
               unselectedLabelTextStyle: TextStyle(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.grey,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.grey,
               ),
               leading: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
@@ -191,7 +187,8 @@ class _TechnicianShellState extends ConsumerState<TechnicianShell> {
                                 ? AppColors.primaryLightGreen.withOpacity(0.15)
                                 : AppColors.primaryDarkGreen.withOpacity(0.1))
                             : Colors.transparent,
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusM),
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,

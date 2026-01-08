@@ -1,7 +1,9 @@
 import 'dart:math';
+import 'dart:convert';
 import '../models/models.dart';
 import 'data_import_service.dart';
 import 'ml_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MockDataService {
   static final MockDataService _instance = MockDataService._internal();
@@ -9,6 +11,8 @@ class MockDataService {
   MockDataService._internal() {
     // Initialize ML service with data
     _trainMLModel();
+    // Load persisted runtime settings (non-blocking)
+    _loadSettings();
   }
 
   final Random _random = Random();
@@ -18,6 +22,104 @@ class MockDataService {
 
   // Calendar reminders storage
   final List<CalendarReminder> _reminders = [];
+
+  // Runtime settings (in-memory)
+  // Alert thresholds per sensor type (min/max)
+  final Map<String, ASMERange> _alertThresholds = {
+    'temperature': ASMERange(min: 20.0, max: 85.0, unit: '°C'),
+    'vibration': ASMERange(min: 0.0, max: 4.5, unit: 'mm/s RMS'),
+    'pressure': ASMERange(min: 2.0, max: 6.0, unit: 'bar'),
+    'current': ASMERange(min: 0.0, max: 50.0, unit: 'A'),
+    'flowrate': ASMERange(min: 0.0, max: 200.0, unit: 'L/min'),
+  };
+
+  // Default cost per hour used for downtime calculations when not set on a machine
+  double _defaultCostPerHour = 500.0;
+
+  // AI sensitivity threshold (confidence below this is considered low sensitivity)
+  double _aiSensitivityThreshold = 0.6;
+
+  // Settings API
+  Map<String, ASMERange> get alertThresholds => Map.from(_alertThresholds);
+
+  void setAlertThreshold(String sensorType, ASMERange range) {
+    _alertThresholds[sensorType.toLowerCase()] = range;
+    _saveThresholdsToPrefs();
+  }
+
+  double get defaultCostPerHour => _defaultCostPerHour;
+
+  void setDefaultCostPerHour(double v, {bool applyToMachines = false}) {
+    _defaultCostPerHour = v;
+    if (applyToMachines) {
+      for (int i = 0; i < _mockMachines.length; i++) {
+        _mockMachines[i] = _mockMachines[i].copyWith(costPerHourDowntime: v);
+      }
+    }
+    // persist
+    _saveDefaultCostToPrefs();
+  }
+
+  double get aiSensitivityThreshold => _aiSensitivityThreshold;
+
+  void setAiSensitivityThreshold(double v) {
+    _aiSensitivityThreshold = v.clamp(0.0, 1.0);
+    _saveAiSensitivityToPrefs();
+  }
+
+  // Persistence helpers
+  Future<void> _loadSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // AI sensitivity
+      final ai = prefs.getDouble('settings:ai_sensitivity');
+      if (ai != null) _aiSensitivityThreshold = ai.clamp(0.0, 1.0);
+
+      // default cost
+      final cost = prefs.getDouble('settings:default_cost_per_hour');
+      if (cost != null) _defaultCostPerHour = cost;
+
+      // thresholds (stored as JSON map)
+      final thr = prefs.getString('settings:thresholds');
+      if (thr != null && thr.isNotEmpty) {
+        final Map<String, dynamic> decoded = json.decode(thr);
+        decoded.forEach((key, value) {
+          try {
+            final min = (value['min'] as num).toDouble();
+            final max = (value['max'] as num).toDouble();
+            final unit = value['unit'] as String? ?? '';
+            _alertThresholds[key] = ASMERange(min: min, max: max, unit: unit);
+          } catch (_) {}
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _saveThresholdsToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final map = <String, Map<String, dynamic>>{};
+      _alertThresholds.forEach((k, v) {
+        map[k] = {'min': v.min, 'max': v.max, 'unit': v.unit};
+      });
+      await prefs.setString('settings:thresholds', json.encode(map));
+    } catch (_) {}
+  }
+
+  Future<void> _saveDefaultCostToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble(
+          'settings:default_cost_per_hour', _defaultCostPerHour);
+    } catch (_) {}
+  }
+
+  Future<void> _saveAiSensitivityToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('settings:ai_sensitivity', _aiSensitivityThreshold);
+    } catch (_) {}
+  }
 
   void _trainMLModel() {
     if (!_isMLTrained) {
@@ -517,27 +619,55 @@ class MockDataService {
       });
     }
 
+    // Prefer explicitly provided ticket AI insight when available (keeps "visual" and "AI Insights" consistent)
+    final ticketAi = ticket.aiInsight ?? '';
+    final hasTicketAi = ticketAi.isNotEmpty;
+
+    final baseWhatIsHappening = hasTicketAi
+        ? '${ticket.componentName != null && ticket.componentName!.isNotEmpty ? 'Component: ${ticket.componentName}. ' : ''}$ticketAi'
+        : (anomalyResult.hasAnomalies
+            ? 'Component: ${ticket.componentName ?? component.name}. ML Analysis: ${anomalyResult.anomalies.length} sensor anomalies detected. ${mlInsight.split('\n').first}'
+            : 'Component: ${ticket.componentName ?? component.name}. All sensors operating within normal parameters. No anomalies detected.');
+
+    final confidence = ticket.aiConfidence ?? failureProbability;
+
     return AIInsightModel(
       id: 'insight_$ticketId',
       ticketId: ticketId,
       machineId: ticket.machineId,
       componentId: ticket.componentId ?? '',
-      whatIsHappening: anomalyResult.hasAnomalies
-          ? 'ML Analysis: ${anomalyResult.anomalies.length} sensor anomalies detected. ${mlInsight.split('\n').first}'
-          : 'All sensors operating within normal parameters. No anomalies detected.',
+      whatIsHappening: baseWhatIsHappening,
       whyItMatters: timeToFailure != null
           ? 'Predicted failure in ~${timeToFailure} hours. Immediate action recommended to prevent unplanned downtime.'
           : 'Preventive maintenance recommended to maintain optimal performance.',
-      potentialCause: mlInsight,
-      confidenceLevel: failureProbability,
+      potentialCause: hasTicketAi
+          ? (mlInsight.isNotEmpty
+              ? '$ticketAi\n\nML Notes:\n$mlInsight'
+              : ticketAi)
+          : (mlInsight.isNotEmpty
+              ? mlInsight
+              : 'No potential cause determined'),
+      confidenceLevel: confidence,
       contributingSignals: signals,
       similarPastCases: similarCases.isNotEmpty
           ? similarCases
           : ['No similar historical cases found in database'],
       uncertaintyNote: anomalyResult.hasAnomalies
-          ? 'ML confidence: ${(failureProbability * 100).toStringAsFixed(1)}%. Verify with physical inspection.'
+          ? (confidence < _aiSensitivityThreshold
+              ? 'ML confidence: ${(confidence * 100).toStringAsFixed(1)}% — below sensitivity threshold ${(_aiSensitivityThreshold * 100).toStringAsFixed(0)}%. Verify with physical inspection.'
+              : 'ML confidence: ${(confidence * 100).toStringAsFixed(1)}%. Verify with physical inspection.')
           : null,
     );
+  }
+
+  List<String> _ml_serviceOrTicketSimilarCases(ComponentModel component,
+      AnomalyDetectionResult anomalyResult, TicketModel ticket) {
+    final similarCases = _mlService.findSimilarCases(component, anomalyResult);
+    // If ML returned nothing, but ticket has a history of similar cases, return that first
+    if (similarCases.isEmpty && ticket.componentId != null) {
+      return ['No similar historical cases found in database'];
+    }
+    return similarCases;
   }
 
   ComponentModel _createDummyComponent() {
@@ -739,6 +869,28 @@ class MockDataService {
         assigneeId: assigneeId,
         assigneeName: assignee.fullName,
       );
+    }
+  }
+
+  // Troubleshooting steps persistence
+  void addTroubleshootingStep(String ticketId, TroubleshootingStep step) {
+    final index = _mockTickets.indexWhere((t) => t.id == ticketId);
+    if (index != -1) {
+      final existing = List<TroubleshootingStep>.from(
+          _mockTickets[index].troubleshootingSteps);
+      existing.add(step);
+      _mockTickets[index] =
+          _mockTickets[index].copyWith(troubleshootingSteps: existing);
+      return;
+    }
+
+    // If not found in private mock list, try imported tickets (not writable) — ignore
+  }
+
+  void addTroubleshootingSteps(
+      String ticketId, List<TroubleshootingStep> steps) {
+    for (final s in steps) {
+      addTroubleshootingStep(ticketId, s);
     }
   }
 

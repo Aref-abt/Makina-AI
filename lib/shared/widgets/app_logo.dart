@@ -12,7 +12,7 @@ class AppLogo extends StatelessWidget {
     this.width = 48,
     this.height = 48,
     this.borderRadius = 12,
-    this.useGradient = true,
+    this.useGradient = false,
   }) : super(key: key);
 
   @override
@@ -22,7 +22,15 @@ class AppLogo extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         gradient: useGradient ? AppColors.primaryGradient : null,
+        color: useGradient ? null : AppColors.white,
         borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          )
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),

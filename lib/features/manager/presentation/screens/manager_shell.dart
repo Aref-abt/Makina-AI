@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../shared/widgets/app_logo.dart';
+import '../../../../shared/data/services/auth_service.dart';
 
 class ManagerShell extends ConsumerStatefulWidget {
   final Widget child;

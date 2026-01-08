@@ -155,6 +155,40 @@ class MachineModel {
     this.imageUrl,
     this.model3DUrl,
   });
+
+  MachineModel copyWith({
+    String? id,
+    String? name,
+    String? type,
+    String? manufacturer,
+    String? model,
+    String? location,
+    String? floor,
+    HealthStatus? healthStatus,
+    double? riskScore,
+    List<ComponentModel>? components,
+    DateTime? installationDate,
+    double? costPerHourDowntime,
+    String? imageUrl,
+    String? model3DUrl,
+  }) {
+    return MachineModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      manufacturer: manufacturer ?? this.manufacturer,
+      model: model ?? this.model,
+      location: location ?? this.location,
+      floor: floor ?? this.floor,
+      healthStatus: healthStatus ?? this.healthStatus,
+      riskScore: riskScore ?? this.riskScore,
+      components: components ?? this.components,
+      installationDate: installationDate ?? this.installationDate,
+      costPerHourDowntime: costPerHourDowntime ?? this.costPerHourDowntime,
+      imageUrl: imageUrl ?? this.imageUrl,
+      model3DUrl: model3DUrl ?? this.model3DUrl,
+    );
+  }
 }
 
 // Component Model
@@ -275,7 +309,8 @@ class TicketModel {
       aiConfidence: aiConfidence ?? this.aiConfidence,
       troubleshootingSteps: troubleshootingSteps ?? this.troubleshootingSteps,
       feedback: feedback ?? this.feedback,
-      estimatedDowntimeMinutes: estimatedDowntimeMinutes ?? this.estimatedDowntimeMinutes,
+      estimatedDowntimeMinutes:
+          estimatedDowntimeMinutes ?? this.estimatedDowntimeMinutes,
       estimatedCost: estimatedCost ?? this.estimatedCost,
     );
   }

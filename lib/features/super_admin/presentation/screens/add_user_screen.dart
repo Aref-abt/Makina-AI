@@ -34,23 +34,61 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
     super.initState();
     if (widget.userId != null) {
       try {
-        final user =
-            MockDataService().users.firstWhere((u) => u.id == widget.userId);
+        // Defensive lookup: avoid throwing during first build and handle unexpected data shapes
+        final matches = MockDataService()
+            .users
+            .where((u) => u.id == widget.userId)
+            .toList();
+        if (matches.isEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('User not found')),
+              );
+              Navigator.of(context).pop();
+            }
+          });
+          return;
+        }
+
+        final user = matches.first;
+
+        // Safely assign fields, validating types where necessary
         _nameController.text = user.fullName;
         _employeeIdController.text = user.employeeId;
         _emailController.text = user.email;
         _selectedRole = user.role;
         _selectedFloor = user.assignedFloor;
-        _selectedExpertise.addAll(user.expertise);
+        // Ensure initial dropdown value exists in our floors list; if not, clear it
+        if (_selectedFloor != null && !_floors.contains(_selectedFloor)) {
+          _selectedFloor = null;
+        }
+
+        // Ensure expertise list contains only valid ExpertiseType items
+        final items = <ExpertiseType>[];
+        for (final e in user.expertise) {
+          if (e is ExpertiseType) {
+            items.add(e);
+          } else if (e is String) {
+            final matched = ExpertiseType.values.firstWhere(
+                (ex) => ex.name == e,
+                orElse: () => ExpertiseType.general);
+            items.add(matched);
+          }
+        }
+        _selectedExpertise.addAll(items);
+
         _selectedMachines.addAll(user.assignedMachineIds);
       } catch (e) {
-        // User not found, show error
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User not found')),
-          );
-          Navigator.of(context).pop();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Unable to open user for edit: $e')),
+            );
+            Navigator.of(context).pop();
+          }
         });
+        return;
       }
     }
   }
@@ -131,8 +169,24 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
                 value: _selectedFloor,
                 decoration:
                     const InputDecoration(prefixIcon: Icon(Icons.layers)),
+                style: isDark
+                    ? AppTextStyles.bodyMedium
+                        .copyWith(color: AppColors.darkText)
+                    : AppTextStyles.bodyMedium
+                        .copyWith(color: AppColors.lightText),
+                dropdownColor:
+                    isDark ? AppColors.darkSurface : AppColors.lightSurface,
                 items: _floors
-                    .map((f) => DropdownMenuItem(value: f, child: Text(f)))
+                    .map((f) => DropdownMenuItem(
+                        value: f,
+                        child: Text(
+                          f,
+                          style: isDark
+                              ? AppTextStyles.bodyMedium
+                                  .copyWith(color: AppColors.darkText)
+                              : AppTextStyles.bodyMedium
+                                  .copyWith(color: AppColors.lightText),
+                        )))
                     .toList(),
                 onChanged: (v) => setState(() => _selectedFloor = v),
               ),
@@ -157,6 +211,11 @@ class _AddUserScreenState extends ConsumerState<AddUserScreen> {
                           selectedColor:
                               AppColors.primaryDarkGreen.withOpacity(0.2),
                           checkmarkColor: AppColors.primaryDarkGreen,
+                          labelStyle: isDark
+                              ? AppTextStyles.labelMedium
+                                  .copyWith(color: AppColors.darkText)
+                              : AppTextStyles.labelMedium
+                                  .copyWith(color: AppColors.lightText),
                         ))
                     .toList(),
               ),

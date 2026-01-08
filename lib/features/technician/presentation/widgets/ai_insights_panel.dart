@@ -30,7 +30,8 @@ class AIInsightsPanel extends StatelessWidget {
                 ],
               ),
               borderRadius: BorderRadius.circular(AppDimensions.radiusL),
-              border: Border.all(color: AppColors.primaryDarkGreen.withOpacity(0.2)),
+              border: Border.all(
+                  color: AppColors.primaryDarkGreen.withOpacity(0.2)),
             ),
             child: Row(
               children: [
@@ -40,7 +41,8 @@ class AIInsightsPanel extends StatelessWidget {
                     color: AppColors.primaryDarkGreen.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.psychology, color: AppColors.primaryDarkGreen, size: 28),
+                  child: const Icon(Icons.psychology,
+                      color: AppColors.primaryDarkGreen, size: 28),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -51,7 +53,8 @@ class AIInsightsPanel extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Text('Confidence: ', style: AppTextStyles.bodySmall),
+                          const Text('Confidence: ',
+                              style: AppTextStyles.bodySmall),
                           _buildConfidenceBadge(insight.confidenceLevel),
                         ],
                       ),
@@ -94,16 +97,22 @@ class AIInsightsPanel extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Contributing signals
-          Text('Contributing Sensor Signals', style: AppTextStyles.h6.copyWith(color: isDark ? AppColors.darkText : AppColors.lightText)),
+          Text('Contributing Sensor Signals',
+              style: AppTextStyles.h6.copyWith(
+                  color: isDark ? AppColors.darkText : AppColors.lightText)),
           const SizedBox(height: 12),
-          ...insight.contributingSignals.map((signal) => _buildSignalCard(signal, isDark)),
+          ...insight.contributingSignals
+              .map((signal) => _buildSignalCard(signal, isDark)),
           const SizedBox(height: 20),
 
           // Similar past cases
           if (insight.similarPastCases.isNotEmpty) ...[
-            Text('Similar Past Cases', style: AppTextStyles.h6.copyWith(color: isDark ? AppColors.darkText : AppColors.lightText)),
+            Text('Similar Past Cases',
+                style: AppTextStyles.h6.copyWith(
+                    color: isDark ? AppColors.darkText : AppColors.lightText)),
             const SizedBox(height: 12),
-            ...insight.similarPastCases.map((caseText) => _buildPastCaseCard(caseText, isDark)),
+            ...insight.similarPastCases
+                .map((caseText) => _buildPastCaseCard(caseText, isDark)),
           ],
 
           // Uncertainty note
@@ -119,15 +128,23 @@ class AIInsightsPanel extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.info_outline, color: AppColors.warning, size: 20),
+                  const Icon(Icons.info_outline,
+                      color: AppColors.warning, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Note', style: AppTextStyles.labelMedium.copyWith(color: AppColors.warning, fontWeight: FontWeight.bold)),
+                        Text('Note',
+                            style: AppTextStyles.labelMedium.copyWith(
+                                color: AppColors.warning,
+                                fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text(insight.uncertaintyNote!, style: AppTextStyles.bodySmall.copyWith(color: isDark ? AppColors.darkText : AppColors.lightText)),
+                        Text(insight.uncertaintyNote!,
+                            style: AppTextStyles.bodySmall.copyWith(
+                                color: isDark
+                                    ? AppColors.darkText
+                                    : AppColors.lightText)),
                       ],
                     ),
                   ),
@@ -163,9 +180,14 @@ class AIInsightsPanel extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
           const SizedBox(width: 6),
-          Text('$label (${(confidence * 100).toStringAsFixed(0)}%)', style: AppTextStyles.labelSmall.copyWith(color: color, fontWeight: FontWeight.w600)),
+          Text('$label (${(confidence * 100).toStringAsFixed(0)}%)',
+              style: AppTextStyles.labelSmall
+                  .copyWith(color: color, fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -183,7 +205,8 @@ class AIInsightsPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-        border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+        border: Border.all(
+            color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,82 +215,191 @@ class AIInsightsPanel extends StatelessWidget {
             children: [
               Icon(icon, color: iconColor, size: 20),
               const SizedBox(width: 8),
-              Text(title, style: AppTextStyles.labelLarge.copyWith(color: iconColor, fontWeight: FontWeight.bold)),
+              Text(title,
+                  style: AppTextStyles.labelLarge
+                      .copyWith(color: iconColor, fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: 12),
-          Text(content, style: AppTextStyles.bodyMedium.copyWith(color: isDark ? AppColors.darkText : AppColors.lightText, height: 1.5)),
+          Text(content,
+              style: AppTextStyles.bodyMedium.copyWith(
+                  color: isDark ? AppColors.darkText : AppColors.lightText,
+                  height: 1.5)),
         ],
       ),
     );
   }
 
   Widget _buildSignalCard(SensorSignal signal, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(AppDimensions.paddingL),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusM),
-        border: Border.all(
-          color: signal.isAbnormal ? AppColors.critical.withOpacity(0.5) : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+    // compute position within normal range for a small inline gauge
+    final rangeSpan = (signal.normalMax - signal.normalMin).abs();
+    final position = rangeSpan > 0
+        ? ((signal.currentValue - signal.normalMin) / rangeSpan).clamp(0.0, 1.0)
+        : 0.5;
+    final deviationSign = signal.deviation >= 0 ? '+' : '-';
+    final deviationAbs = signal.deviation.abs();
+
+    return Tooltip(
+      message:
+          '${signal.type}: ${signal.currentValue}${signal.unit} (normal ${signal.normalMin}-${signal.normalMax} ${signal.unit})',
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(AppDimensions.paddingL),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusM),
+          border: Border.all(
+            color: signal.isAbnormal
+                ? AppColors.critical.withOpacity(0.5)
+                : (isDark ? AppColors.darkBorder : AppColors.lightBorder),
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(signal.type, style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.bold)),
-              const Spacer(),
-              if (signal.isAbnormal)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: AppColors.critical.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(signal.type,
+                    style: AppTextStyles.labelLarge
+                        .copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                Text(signal.unit,
+                    style: AppTextStyles.labelSmall.copyWith(
+                        color: isDark
+                            ? AppColors.darkTextSecondary
+                            : AppColors.lightTextSecondary)),
+                const Spacer(),
+                if (signal.isAbnormal)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                        color: AppColors.critical.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.warning_amber,
+                            size: 14, color: AppColors.critical),
+                        const SizedBox(width: 6),
+                        Text('Abnormal',
+                            style: AppTextStyles.labelSmall
+                                .copyWith(color: AppColors.critical)),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Gauge + values
+            Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.warning_amber, size: 14, color: AppColors.critical),
-                      const SizedBox(width: 4),
-                      Text('Abnormal', style: AppTextStyles.labelSmall.copyWith(color: AppColors.critical)),
+                      Text('Current',
+                          style: AppTextStyles.labelSmall.copyWith(
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary)),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text('${signal.currentValue.toStringAsFixed(1)}',
+                              style: AppTextStyles.h5.copyWith(
+                                  color: signal.isAbnormal
+                                      ? AppColors.critical
+                                      : AppColors.primaryDarkGreen)),
+                          const SizedBox(width: 6),
+                          Text(signal.unit,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: position,
+                          minHeight: 8,
+                          backgroundColor: (isDark
+                                  ? AppColors.darkBorder
+                                  : AppColors.lightBorder)
+                              .withOpacity(0.4),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              signal.isAbnormal
+                                  ? AppColors.critical
+                                  : AppColors.primaryDarkGreen),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Text('Range: ',
+                              style: AppTextStyles.labelSmall.copyWith(
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary)),
+                          Text(
+                              '${signal.normalMin.toStringAsFixed(1)} - ${signal.normalMax.toStringAsFixed(1)} ${signal.unit}',
+                              style: AppTextStyles.bodySmall),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Current', style: AppTextStyles.labelSmall.copyWith(color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
-                    Text('${signal.currentValue.toStringAsFixed(1)} ${signal.unit}', style: AppTextStyles.h5.copyWith(color: signal.isAbnormal ? AppColors.critical : AppColors.primaryDarkGreen)),
-                  ],
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text('Deviation',
+                          style: AppTextStyles.labelSmall.copyWith(
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary)),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            signal.deviation >= 0
+                                ? Icons.arrow_upward
+                                : Icons.arrow_downward,
+                            size: 16,
+                            color: signal.isAbnormal
+                                ? AppColors.critical
+                                : AppColors.warning,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                              '$deviationSign${deviationAbs.toStringAsFixed(1)}%',
+                              style: AppTextStyles.h6.copyWith(
+                                  color: signal.isAbnormal
+                                      ? AppColors.critical
+                                      : AppColors.warning)),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (signal.unit.isNotEmpty)
+                        Text('Unit: ${signal.unit}',
+                            style: AppTextStyles.labelSmall.copyWith(
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.lightTextSecondary)),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Normal Range', style: AppTextStyles.labelSmall.copyWith(color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
-                    Text('${signal.normalMin.toStringAsFixed(0)} - ${signal.normalMax.toStringAsFixed(0)} ${signal.unit}', style: AppTextStyles.bodyMedium),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Deviation', style: AppTextStyles.labelSmall.copyWith(color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary)),
-                    Text('+${signal.deviation.toStringAsFixed(1)}%', style: AppTextStyles.bodyMedium.copyWith(color: signal.isAbnormal ? AppColors.critical : AppColors.warning)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -283,9 +415,17 @@ class AIInsightsPanel extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.history, size: 18, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+          Icon(Icons.history,
+              size: 18,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.lightTextSecondary),
           const SizedBox(width: 12),
-          Expanded(child: Text(caseText, style: AppTextStyles.bodySmall.copyWith(color: isDark ? AppColors.darkText : AppColors.lightText))),
+          Expanded(
+              child: Text(caseText,
+                  style: AppTextStyles.bodySmall.copyWith(
+                      color:
+                          isDark ? AppColors.darkText : AppColors.lightText))),
         ],
       ),
     );

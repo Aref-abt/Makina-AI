@@ -30,11 +30,13 @@ class _ComponentPosition {
 class Machine3DViewer extends StatefulWidget {
   final String machineId;
   final String? highlightedComponentId;
+  final String? ticketId;
 
   const Machine3DViewer({
     super.key,
     required this.machineId,
     this.highlightedComponentId,
+    this.ticketId,
   });
 
   @override
@@ -587,11 +589,32 @@ class _Machine3DViewerState extends State<Machine3DViewer>
                           fontWeight: FontWeight.w600)),
                 ),
                 const SizedBox(height: 4),
-                Text('Risk: ${(component.riskLevel * 100).toStringAsFixed(0)}%',
-                    style: AppTextStyles.labelSmall.copyWith(
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.lightTextSecondary)),
+                Builder(builder: (context) {
+                  double displayRisk = component.riskLevel;
+                  try {
+                    if (widget.ticketId != null) {
+                      final related = _mockData.tickets.firstWhere((t) =>
+                          t.id == widget.ticketId ||
+                          t.componentId == component.id);
+                      if (related.aiConfidence != null)
+                        displayRisk = related.aiConfidence!;
+                    } else {
+                      final related = _mockData.tickets
+                          .firstWhere((t) => t.componentId == component.id);
+                      if (related.aiConfidence != null)
+                        displayRisk = related.aiConfidence!;
+                    }
+                  } catch (e) {
+                    // ignore - fallback to component riskLevel
+                  }
+
+                  return Text(
+                      'Risk: ${(displayRisk * 100).toStringAsFixed(0)}%',
+                      style: AppTextStyles.labelSmall.copyWith(
+                          color: isDark
+                              ? AppColors.darkTextSecondary
+                              : AppColors.lightTextSecondary));
+                }),
               ],
             ),
           ],
@@ -693,22 +716,45 @@ class _Machine3DViewerState extends State<Machine3DViewer>
                             ? AppColors.darkTextSecondary
                             : AppColors.lightTextSecondary)),
                 const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: component.riskLevel,
-                    minHeight: 8,
-                    backgroundColor:
-                        isDark ? AppColors.darkBorder : AppColors.lightBorder,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                        component.healthStatus.color),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                    '${(component.riskLevel * 100).toStringAsFixed(0)}% risk of failure',
-                    style: AppTextStyles.bodySmall
-                        .copyWith(color: component.healthStatus.color)),
+                Builder(builder: (context) {
+                  double displayRisk = component.riskLevel;
+                  try {
+                    if (widget.ticketId != null) {
+                      final related = _mockData.tickets.firstWhere((t) =>
+                          t.id == widget.ticketId ||
+                          t.componentId == component.id);
+                      if (related.aiConfidence != null)
+                        displayRisk = related.aiConfidence!;
+                    } else {
+                      final related = _mockData.tickets
+                          .firstWhere((t) => t.componentId == component.id);
+                      if (related.aiConfidence != null)
+                        displayRisk = related.aiConfidence!;
+                    }
+                  } catch (e) {}
+
+                  return Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: displayRisk,
+                          minHeight: 8,
+                          backgroundColor: isDark
+                              ? AppColors.darkBorder
+                              : AppColors.lightBorder,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              component.healthStatus.color),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                          '${(displayRisk * 100).toStringAsFixed(0)}% risk of failure',
+                          style: AppTextStyles.bodySmall
+                              .copyWith(color: component.healthStatus.color)),
+                    ],
+                  );
+                }),
                 const SizedBox(height: 24),
                 Text('Sensor Readings', style: AppTextStyles.h6),
                 const SizedBox(height: 12),
