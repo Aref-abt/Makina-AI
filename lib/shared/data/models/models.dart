@@ -238,6 +238,7 @@ class TicketModel {
   final TechnicianFeedback? feedback;
   final double? estimatedDowntimeMinutes;
   final double? estimatedCost;
+  final int? storyPoints;
 
   TicketModel({
     required this.id,
@@ -262,6 +263,7 @@ class TicketModel {
     this.feedback,
     this.estimatedDowntimeMinutes,
     this.estimatedCost,
+    this.storyPoints,
   }) : createdAt = createdAt ?? DateTime.now();
 
   TicketModel copyWith({
@@ -287,6 +289,7 @@ class TicketModel {
     TechnicianFeedback? feedback,
     double? estimatedDowntimeMinutes,
     double? estimatedCost,
+    int? storyPoints,
   }) {
     return TicketModel(
       id: id ?? this.id,
@@ -312,6 +315,7 @@ class TicketModel {
       estimatedDowntimeMinutes:
           estimatedDowntimeMinutes ?? this.estimatedDowntimeMinutes,
       estimatedCost: estimatedCost ?? this.estimatedCost,
+      storyPoints: storyPoints ?? this.storyPoints,
     );
   }
 }
@@ -656,6 +660,9 @@ class CalendarReminder {
   final String title;
   final DateTime date;
   final String? notes;
+  final String? location; // optional machine/location
+  final SeverityLevel? priority;
+  final double? estimatedHours;
   final DateTime createdAt;
   final String createdBy;
 
@@ -664,6 +671,9 @@ class CalendarReminder {
     required this.title,
     required this.date,
     this.notes,
+    this.location,
+    this.priority,
+    this.estimatedHours,
     required this.createdAt,
     required this.createdBy,
   });
@@ -673,6 +683,9 @@ class CalendarReminder {
     String? title,
     DateTime? date,
     String? notes,
+    String? location,
+    SeverityLevel? priority,
+    double? estimatedHours,
     DateTime? createdAt,
     String? createdBy,
   }) {
@@ -681,6 +694,9 @@ class CalendarReminder {
       title: title ?? this.title,
       date: date ?? this.date,
       notes: notes ?? this.notes,
+      location: location ?? this.location,
+      priority: priority ?? this.priority,
+      estimatedHours: estimatedHours ?? this.estimatedHours,
       createdAt: createdAt ?? this.createdAt,
       createdBy: createdBy ?? this.createdBy,
     );

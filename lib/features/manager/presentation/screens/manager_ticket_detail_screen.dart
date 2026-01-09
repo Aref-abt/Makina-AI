@@ -14,8 +14,20 @@ class ManagerTicketDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ticket =
-        MockDataService().tickets.firstWhere((t) => t.id == ticketId);
+    final tickets = MockDataService().tickets;
+    final index = tickets.indexWhere((t) => t.id == ticketId);
+    if (index == -1) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.go('/manager/tickets')),
+          title: const Text('Ticket Not Found'),
+        ),
+        body: const Center(child: Text('This ticket could not be found.')),
+      );
+    }
+    final ticket = tickets[index];
 
     return DefaultTabController(
       length: 3,
@@ -74,6 +86,9 @@ class ManagerTicketDetailScreen extends ConsumerWidget {
           if (ticket.assigneeName != null)
             _buildInfoRow('Assignee', ticket.assigneeName!,
                 AppColors.primaryDarkGreen, isDark),
+          if (ticket.storyPoints != null)
+            _buildInfoRow(
+                'Story Points', ticket.storyPoints!.toString(), null, isDark),
           _buildInfoRow(
               'Skill Required', ticket.requiredSkill.displayName, null, isDark),
           const SizedBox(height: 20),

@@ -426,6 +426,7 @@ class MockDataService {
         aiConfidence: 0.87,
         estimatedDowntimeMinutes: 180,
         estimatedCost: 2550.0,
+        storyPoints: 8,
         troubleshootingSteps: [
           TroubleshootingStep(
             id: 'step_001_1',
@@ -463,6 +464,7 @@ class MockDataService {
         aiConfidence: 0.72,
         estimatedDowntimeMinutes: 90,
         estimatedCost: 1080.0,
+        storyPoints: 5,
       ),
       TicketModel(
         id: 'ticket_003',
@@ -485,6 +487,7 @@ class MockDataService {
         aiConfidence: 0.81,
         estimatedDowntimeMinutes: 60,
         estimatedCost: 1200.0,
+        storyPoints: 3,
       ),
       TicketModel(
         id: 'ticket_004',
@@ -504,6 +507,7 @@ class MockDataService {
         aiConfidence: 0.94,
         estimatedDowntimeMinutes: 240,
         estimatedCost: 2080.0,
+        storyPoints: 13,
       ),
       TicketModel(
         id: 'ticket_005',
@@ -539,6 +543,7 @@ class MockDataService {
           notes:
               'Adjusted belt tension and realigned tracking rollers. Running smoothly now.',
         ),
+        storyPoints: 2,
       ),
       TicketModel(
         id: 'ticket_006',
@@ -561,17 +566,38 @@ class MockDataService {
         aiConfidence: 0.76,
         estimatedDowntimeMinutes: 45,
         estimatedCost: 285.0,
+        storyPoints: 5,
       ),
     ];
   }
 
   // Get AI Insight for a ticket using REAL ML predictions
   AIInsightModel getAIInsight(String ticketId) {
-    final ticket = tickets.firstWhere((t) => t.id == ticketId);
+    TicketModel? ticket;
+    try {
+      ticket = tickets.firstWhere((t) => t.id == ticketId);
+    } catch (_) {
+      // Return a generic empty insight if ticket not found
+      return AIInsightModel(
+        id: 'insight_$ticketId',
+        ticketId: ticketId,
+        machineId: '',
+        componentId: '',
+        whatIsHappening: 'No ticket data available for analysis.',
+        whyItMatters: 'No data',
+        potentialCause: 'No data',
+        confidenceLevel: 0.0,
+        contributingSignals: [],
+        similarPastCases: ['No cases'],
+      );
+    }
+
+    // Ensure ticket is non-null for the rest of this function
+    final ticketNonNull = ticket!;
 
     // Get the actual component for ML analysis
-    final component = ticket.componentId != null
-        ? components.firstWhere((c) => c.id == ticket.componentId,
+    final component = ticketNonNull.componentId != null
+        ? components.firstWhere((c) => c.id == ticketNonNull.componentId,
             orElse: () => components.isNotEmpty
                 ? components.first
                 : _createDummyComponent())
@@ -620,22 +646,22 @@ class MockDataService {
     }
 
     // Prefer explicitly provided ticket AI insight when available (keeps "visual" and "AI Insights" consistent)
-    final ticketAi = ticket.aiInsight ?? '';
+    final ticketAi = ticketNonNull.aiInsight ?? '';
     final hasTicketAi = ticketAi.isNotEmpty;
 
     final baseWhatIsHappening = hasTicketAi
-        ? '${ticket.componentName != null && ticket.componentName!.isNotEmpty ? 'Component: ${ticket.componentName}. ' : ''}$ticketAi'
+        ? '${ticketNonNull.componentName != null && ticketNonNull.componentName!.isNotEmpty ? 'Component: ${ticketNonNull.componentName}. ' : ''}$ticketAi'
         : (anomalyResult.hasAnomalies
-            ? 'Component: ${ticket.componentName ?? component.name}. ML Analysis: ${anomalyResult.anomalies.length} sensor anomalies detected. ${mlInsight.split('\n').first}'
+            ? 'Component: ${ticketNonNull.componentName ?? component.name}. ML Analysis: ${anomalyResult.anomalies.length} sensor anomalies detected. ${mlInsight.split('\n').first}'
             : 'Component: ${ticket.componentName ?? component.name}. All sensors operating within normal parameters. No anomalies detected.');
 
-    final confidence = ticket.aiConfidence ?? failureProbability;
+    final confidence = ticketNonNull.aiConfidence ?? failureProbability;
 
     return AIInsightModel(
       id: 'insight_$ticketId',
       ticketId: ticketId,
-      machineId: ticket.machineId,
-      componentId: ticket.componentId ?? '',
+      machineId: ticketNonNull.machineId,
+      componentId: ticketNonNull.componentId ?? '',
       whatIsHappening: baseWhatIsHappening,
       whyItMatters: timeToFailure != null
           ? 'Predicted failure in ~${timeToFailure} hours. Immediate action recommended to prevent unplanned downtime.'
@@ -804,15 +830,17 @@ class MockDataService {
 
   // Update ticket status
   void updateTicketStatus(String ticketId, TicketStatus newStatus) {
-    final index = tickets.indexWhere((t) => t.id == ticketId);
+    final index = _mockTickets.indexWhere((t) => t.id == ticketId);
     if (index != -1) {
-      tickets[index] = tickets[index].copyWith(
+      _mockTickets[index] = _mockTickets[index].copyWith(
         status: newStatus,
         respondedAt:
             newStatus == TicketStatus.inProgress ? DateTime.now() : null,
         resolvedAt: newStatus == TicketStatus.done ? DateTime.now() : null,
       );
+      return;
     }
+    // Not in private mock list — ignore (imported tickets are read-only)
   }
 
   // Create a new ticket and add to the list
@@ -824,6 +852,7 @@ class MockDataService {
     SeverityLevel severity = SeverityLevel.medium,
     ExpertiseType requiredSkill = ExpertiseType.general,
     String? assigneeId,
+    int? storyPoints,
   }) {
     final newId = 'ticket_${_random.nextInt(100000)}';
     final ticket = TicketModel(
@@ -835,9 +864,10 @@ class MockDataService {
       severity: severity,
       requiredSkill: requiredSkill,
       assigneeId: assigneeId,
+      storyPoints: storyPoints,
       createdAt: DateTime.now(),
     );
-    tickets.insert(0, ticket);
+    _mockTickets.insert(0, ticket);
     return ticket;
   }
 
@@ -862,14 +892,16 @@ class MockDataService {
 
   // Assign ticket
   void assignTicket(String ticketId, String assigneeId) {
-    final index = tickets.indexWhere((t) => t.id == ticketId);
+    final index = _mockTickets.indexWhere((t) => t.id == ticketId);
     final assignee = users.firstWhere((u) => u.id == assigneeId);
     if (index != -1) {
-      tickets[index] = tickets[index].copyWith(
+      _mockTickets[index] = _mockTickets[index].copyWith(
         assigneeId: assigneeId,
         assigneeName: assignee.fullName,
       );
+      return;
     }
+    // Not in mock list — ignore
   }
 
   // Troubleshooting steps persistence

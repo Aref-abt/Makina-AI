@@ -331,31 +331,35 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                               .map((s) => s[0])
                               .take(2)
                               .join();
-                          return GestureDetector(
-                            onTap: () => context.go('/manager/tickets/${t.id}'),
-                            child: Container(
-                              width: 18,
-                              height: 18,
-                              margin: const EdgeInsets.symmetric(horizontal: 2),
-                              decoration: BoxDecoration(
-                                color: t.severity.color,
-                                shape: BoxShape.circle,
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(initials,
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 9)),
+                          return Container(
+                            width: 18,
+                            height: 18,
+                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                            decoration: BoxDecoration(
+                              color: t.severity.color,
+                              shape: BoxShape.circle,
                             ),
+                            alignment: Alignment.center,
+                            child: Text(initials,
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 9)),
                           );
                         }).toList(),
                       if (hasReminders)
-                        Container(
-                          width: 6,
-                          height: 6,
-                          margin: const EdgeInsets.symmetric(horizontal: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryLightGreen,
-                            shape: BoxShape.circle,
+                        GestureDetector(
+                          onTap: () {
+                            final remindersForDate =
+                                MockDataService().getRemindersForDate(date);
+                            _showReminderDetails(date, remindersForDate);
+                          },
+                          child: Container(
+                            width: 6,
+                            height: 6,
+                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryLightGreen,
+                              shape: BoxShape.circle,
+                            ),
                           ),
                         ),
                     ],
@@ -418,6 +422,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           ...reminders.map((reminder) => Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
+                  onTap: () => _showReminderDetails(reminder.date,
+                      MockDataService().getRemindersForDate(reminder.date)),
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -533,4 +539,211 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   String _formatDate(DateTime date) => '${date.day}/${date.month}/${date.year}';
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
+
+  void _showReminderDetails(DateTime date, List<CalendarReminder> reminders) {
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          final isDark = Theme.of(ctx).brightness == Brightness.dark;
+          return AlertDialog(
+            title: Text('Reminders for ${_formatDate(date)}'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView(
+                shrinkWrap: true,
+                children: reminders.map((r) {
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(r.title, style: AppTextStyles.h6),
+                          const SizedBox(height: 6),
+                          if (r.location != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Row(
+                                children: [
+                                  Text('Location:',
+                                      style: AppTextStyles.labelMedium.copyWith(
+                                          color: isDark
+                                              ? AppColors.darkTextSecondary
+                                              : AppColors.lightTextSecondary)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                      child: Text(r.location!,
+                                          style: AppTextStyles.bodyMedium)),
+                                ],
+                              ),
+                            ),
+                          if (r.priority != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Row(
+                                children: [
+                                  Text('Priority:',
+                                      style: AppTextStyles.labelMedium.copyWith(
+                                          color: isDark
+                                              ? AppColors.darkTextSecondary
+                                              : AppColors.lightTextSecondary)),
+                                  const SizedBox(width: 12),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                        color:
+                                            r.priority!.color.withOpacity(0.15),
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                    child: Text(r.priority!.displayName,
+                                        style: AppTextStyles.labelMedium
+                                            .copyWith(
+                                                color: r.priority!.color,
+                                                fontWeight: FontWeight.w600)),
+                                  )
+                                ],
+                              ),
+                            ),
+                          if (r.estimatedHours != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Row(
+                                children: [
+                                  Text('Estimated Hours:',
+                                      style: AppTextStyles.labelMedium.copyWith(
+                                          color: isDark
+                                              ? AppColors.darkTextSecondary
+                                              : AppColors.lightTextSecondary)),
+                                  const SizedBox(width: 12),
+                                  Text('${r.estimatedHours}',
+                                      style: AppTextStyles.bodyMedium),
+                                ],
+                              ),
+                            ),
+                          if (r.notes != null) ...[
+                            const SizedBox(height: 8),
+                            Text(r.notes!),
+                          ],
+                          const SizedBox(height: 8),
+                          Text(
+                              'Created by ${r.createdBy} • ${_formatDate(r.createdAt)}',
+                              style: AppTextStyles.labelSmall.copyWith(
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.lightTextSecondary)),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Close')),
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    // Open full edit dialog
+                    _showEditReminderDialog(
+                        reminders.isNotEmpty ? reminders.first : null);
+                  },
+                  child: const Text('Edit'))
+            ],
+          );
+        });
+  }
+
+  void _showEditReminderDialog(CalendarReminder? reminder) {
+    final titleController = TextEditingController(text: reminder?.title ?? '');
+    final notesController = TextEditingController(text: reminder?.notes ?? '');
+    final locationController =
+        TextEditingController(text: reminder?.location ?? '');
+    SeverityLevel? priority = reminder?.priority ?? SeverityLevel.low;
+    double? estHours = reminder?.estimatedHours;
+
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          final isDark = Theme.of(ctx).brightness == Brightness.dark;
+          return AlertDialog(
+            title: Text(reminder == null ? 'Add Reminder' : 'Edit Reminder'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                      controller: titleController,
+                      decoration: const InputDecoration(labelText: 'Title')),
+                  const SizedBox(height: 8),
+                  TextField(
+                      controller: notesController,
+                      decoration: const InputDecoration(labelText: 'Notes'),
+                      maxLines: 3),
+                  const SizedBox(height: 8),
+                  TextField(
+                      controller: locationController,
+                      decoration: const InputDecoration(
+                          labelText: 'Location / Machine')),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<SeverityLevel>(
+                    value: priority,
+                    items: SeverityLevel.values
+                        .map((s) => DropdownMenuItem(
+                            value: s, child: Text(s.displayName)))
+                        .toList(),
+                    onChanged: (v) => priority = v,
+                    decoration: const InputDecoration(labelText: 'Priority'),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    decoration:
+                        const InputDecoration(labelText: 'Estimated Hours'),
+                    keyboardType:
+                        TextInputType.numberWithOptions(decimal: true),
+                    onChanged: (v) => estHours = double.tryParse(v),
+                    controller:
+                        TextEditingController(text: estHours?.toString()),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel')),
+              FilledButton(
+                  onPressed: () {
+                    if (titleController.text.trim().isEmpty) return;
+                    final updated = CalendarReminder(
+                      id: reminder?.id ?? const Uuid().v4(),
+                      title: titleController.text.trim(),
+                      date: reminder?.date ?? _selectedDate,
+                      notes: notesController.text.trim().isEmpty
+                          ? null
+                          : notesController.text.trim(),
+                      location: locationController.text.trim().isEmpty
+                          ? null
+                          : locationController.text.trim(),
+                      priority: priority,
+                      estimatedHours: estHours,
+                      createdAt: reminder?.createdAt ?? DateTime.now(),
+                      createdBy: reminder?.createdBy ?? 'manager@makina.ai',
+                    );
+
+                    if (reminder == null) {
+                      MockDataService().addReminder(updated);
+                    } else {
+                      MockDataService().updateReminder(updated);
+                    }
+                    Navigator.pop(ctx);
+                    setState(() {});
+                  },
+                  child: const Text('Save'))
+            ],
+          );
+        });
+  }
 }

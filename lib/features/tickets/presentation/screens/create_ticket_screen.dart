@@ -19,6 +19,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   final _descController = TextEditingController();
   SeverityLevel _severity = SeverityLevel.medium;
   String? _selectedMachineId;
+  int? _storyPoints = 3;
 
   @override
   void initState() {
@@ -37,6 +38,13 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
     final machines = MockDataService().machines;
+    if (machines.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('No machines available. Add a machine first.')),
+      );
+      return;
+    }
     final machine = machines.firstWhere((m) => m.id == _selectedMachineId,
         orElse: () => machines.first);
 
@@ -46,6 +54,7 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
       machineId: machine.id,
       machineName: machine.name,
       severity: _severity,
+      storyPoints: _storyPoints,
     );
 
     // Update technician tickets provider if present (some screens use it)
@@ -82,6 +91,15 @@ class _CreateTicketScreenState extends ConsumerState<CreateTicketScreen> {
                 decoration: const InputDecoration(labelText: 'Title'),
                 validator: (v) =>
                     (v == null || v.isEmpty) ? 'Please enter a title' : null,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<int>(
+                value: _storyPoints,
+                decoration: const InputDecoration(labelText: 'Story Points'),
+                items: [1, 2, 3, 5, 8, 13]
+                    .map((s) => DropdownMenuItem(value: s, child: Text('$s')))
+                    .toList(),
+                onChanged: (v) => setState(() => _storyPoints = v),
               ),
               const SizedBox(height: 12),
               TextFormField(

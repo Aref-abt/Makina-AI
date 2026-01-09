@@ -57,24 +57,19 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
               ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d.weekday - 1])
           .toList();
     } else if (_selectedPeriod == 'Month') {
-      // last 30 days
-      periods = List.generate(
-          30,
-          (i) => DateTime(now.year, now.month, now.day)
-              .subtract(Duration(days: 29 - i)));
-      labels = periods
-          .map((d) => '${d.day}')
-          .toList(); // show day-of-month; we'll hide some labels in the chart
-    } else {
-      // Year: last 12 months
+      // Show last 12 months (aggregate by month)
       periods = List.generate(12, (i) {
         final dt = DateTime(now.year, now.month, 1)
             .subtract(Duration(days: 30 * (11 - i)));
         return DateTime(dt.year, dt.month, 1);
       });
-      labels = periods
-          .map((d) => DateFormat.MMM().format(d))
-          .toList(); // Jan, Feb, ...
+      labels = periods.map((d) => DateFormat.MMM().format(d)).toList();
+    } else {
+      // Year: show last 5 years
+      final years = 5;
+      periods = List.generate(
+          years, (i) => DateTime(now.year - (years - 1 - i), 1, 1));
+      labels = periods.map((d) => DateFormat('yyyy').format(d)).toList();
     }
 
     List<double> downtimeValues = List.filled(periods.length, 0.0);
@@ -84,6 +79,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
       final start = periods[i];
       DateTime end;
       if (_selectedPeriod == 'Year') {
+        // end = start of next year
+        end = DateTime(start.year + 1, 1, 1);
+      } else if (_selectedPeriod == 'Month') {
+        // end = start of next month
         end = DateTime(start.year, start.month + 1, 1);
       } else {
         end = start.add(const Duration(days: 1));
@@ -119,10 +118,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       } else if (_selectedPeriod == 'Month') {
         downtimeValues = List.generate(
-            30, (i) => [45.0, 80.0, 60.0, 120.0, 95.0, 70.0, 55.0][i % 7]);
+            periods.length, (i) => [120.0, 95.0, 80.0, 110.0][i % 4]);
       } else {
-        downtimeValues =
-            List.generate(12, (i) => [120.0, 95.0, 80.0, 110.0][i % 4]);
+        downtimeValues = List.generate(
+            periods.length, (i) => [480.0, 360.0, 300.0, 420.0][i % 4]);
       }
     }
     if (!hasResponseData) {
@@ -130,10 +129,10 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
         responseValues = [120.0, 90.0, 135.0, 75.0, 60.0, 95.0, 80.0];
       } else if (_selectedPeriod == 'Month') {
         responseValues = List.generate(
-            30, (i) => [120.0, 90.0, 135.0, 75.0, 60.0, 95.0, 80.0][i % 7]);
+            periods.length, (i) => [90.0, 100.0, 110.0, 95.0][i % 4]);
       } else {
-        responseValues =
-            List.generate(12, (i) => [90.0, 100.0, 110.0, 95.0][i % 4]);
+        responseValues = List.generate(
+            periods.length, (i) => [240.0, 220.0, 260.0, 210.0][i % 4]);
       }
     }
     return Scaffold(
@@ -322,6 +321,122 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                       ),
                     ),
                   ),
+                ),
+              ),
+            ),
+
+            // Datasets Overview (small, validated widgets)
+            Text('Datasets Overview', style: AppTextStyles.h6),
+            const SizedBox(height: 12),
+            _buildChartCard(
+              isDark: isDark,
+              child: Padding(
+                padding: const EdgeInsets.all(AppDimensions.paddingL),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Vibration (24h)',
+                              style: AppTextStyles.bodyMedium),
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 160,
+                            child: Builder(builder: (_) {
+                              final points = MockDataService()
+                                  .generateSensorHistory('vibration', 24);
+                              final spots = List.generate(points.length,
+                                  (i) => FlSpot(i.toDouble(), points[i].value));
+                              if (spots.isEmpty)
+                                return const Center(
+                                    child: Text('No sensor data'));
+                              final minY = spots
+                                      .map((s) => s.y)
+                                      .reduce((a, b) => a < b ? a : b) -
+                                  1;
+                              final maxY = spots
+                                      .map((s) => s.y)
+                                      .reduce((a, b) => a > b ? a : b) +
+                                  1;
+                              return LineChart(LineChartData(
+                                minY: minY,
+                                maxY: maxY,
+                                lineBarsData: [
+                                  LineChartBarData(
+                                    spots: spots,
+                                    isCurved: true,
+                                    color: AppColors.info,
+                                    barWidth: 2,
+                                    dotData: FlDotData(show: false),
+                                    belowBarData: BarAreaData(show: false),
+                                  ),
+                                ],
+                                titlesData: FlTitlesData(show: false),
+                                gridData: FlGridData(show: false),
+                                borderData: FlBorderData(show: false),
+                              ));
+                            }),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Cost by period',
+                              style: AppTextStyles.bodyMedium),
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 160,
+                            child: BarChart(BarChartData(
+                              alignment: BarChartAlignment.spaceAround,
+                              maxY: (downtimeValues.isNotEmpty
+                                      ? downtimeValues
+                                          .reduce((a, b) => a > b ? a : b)
+                                      : 1) *
+                                  1.2,
+                              titlesData: FlTitlesData(show: false),
+                              borderData: FlBorderData(show: false),
+                              barGroups: List.generate(
+                                downtimeValues.length,
+                                (i) => BarChartGroupData(
+                                  x: i,
+                                  barRods: [
+                                    BarChartRodData(
+                                      toY: downtimeValues[i],
+                                      color: AppColors.primaryDarkGreen,
+                                      width: 8,
+                                    )
+                                  ],
+                                ),
+                              ),
+                            )),
+                          ),
+                          const SizedBox(height: 12),
+                          Builder(builder: (_) {
+                            final kpi = MockDataService().getDashboardKPIs();
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Estimated Cost',
+                                    style: AppTextStyles.labelSmall),
+                                const SizedBox(height: 4),
+                                Text(
+                                    '\$${kpi.estimatedCostImpact.toStringAsFixed(0)}',
+                                    style: AppTextStyles.h4
+                                        .copyWith(color: AppColors.critical)),
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -706,6 +821,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
